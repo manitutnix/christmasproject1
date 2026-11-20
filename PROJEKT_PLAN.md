@@ -141,13 +141,16 @@ Project1/
 - [x] **Titelbanner & Vollbild:** „Charlottes Weihnachtszauber“ bleibt als
       festes Banner oben links sichtbar. Ein Schalter oben rechts startet den
       Vollbildmodus (`Fullscreen API`, inkl. `webkit`-Fallback, CSS-Pseudo-Vollbild
-      für iOS Safari und best-effort Landscape-Lock auf Mobilgeräten). Die
-      800×450-Szene wird dabei weiterhin nur skaliert, nie gestaucht.
+      für iOS Safari und best-effort Landscape-Lock auf Mobilgeräten). Direkt
+      daneben liegt ein Reset-Schalter (↻), der jederzeit zum Anfang zurücksetzt.
+      Die 800×450-Szene wird dabei weiterhin nur skaliert, nie gestaucht.
 - [x] Inventarsystem (Hammer, Weihnachtskugel und Stock aufsammeln)
 - [x] **Drei Sammelobjekte:** Der Hammer kommt aus dem Zelt, die Kugel fällt beim
       Baumklick herunter und wird per Hotspot aufgehoben. Der erste Vogel trägt den
       Stock im Schnabel und lässt ihn über den ersten Tannen in die Lücke bei x≈99
-      fallen – erst danach ist er per Hotspot aufhebbar.
+      fallen – erst danach ist er per Hotspot aufhebbar. Der erste Vogel erscheint
+      erst 2 Sekunden nach der ersten Interaktion; die drei kleineren Tannen sind
+      ebenfalls anklickbar, haben aber sonst keine Wirkung.
 - [x] **Inventar verschönert:** pixeliger Werkzeuggürtel unten rechts, drei Slots,
       goldener Rahmen, Icons aus den Original-Sprites, Statuszeile und
       Pop-Animation beim Einsammeln. Dialogbox und Inventar sind unten bündig und

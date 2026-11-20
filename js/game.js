@@ -139,6 +139,8 @@ const GAME = {
   flapTimer: null,
   birdAnim: null,
   birdWillDrop: false,    // der erste Vogel bringt den Stock
+  firstInteractionDone: false, // erster Klick in der Szene hat den Vogel scharf gemacht
+  firstBirdDone: false,   // der erste Vogelbesuch hat stattgefunden
   birdCarryStick: false,
   birdCarryEl: null,
   birdFollowFrame: null,
@@ -148,6 +150,8 @@ const GAME = {
   invStatus: null,
   endScreen: null,
   restartBtn: null,
+  resetBtn: null,
+  fullscreenBtn: null,
 
   start() {
     this.dialog = document.getElementById('dialog-text');
@@ -156,6 +160,7 @@ const GAME = {
     this.endScreen = document.getElementById('end-screen');
     this.restartBtn = document.getElementById('restart-btn');
     this.fullscreenBtn = document.getElementById('fullscreen-btn');
+    this.resetBtn = document.getElementById('reset-btn');
 
     this.fitToViewport();
     window.addEventListener('resize', () => this.fitToViewport());
@@ -168,6 +173,7 @@ const GAME = {
     this.renderScene();
     this.setupClickHandlers();
     this.restartBtn.addEventListener('click', () => this.restart());
+    this.resetBtn.addEventListener('click', () => this.restart());
     this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
 
     const fsChange = () => this.onFullscreenChange();
@@ -672,6 +678,13 @@ const GAME = {
     this.placeImage(container, ASSETS.tree, { left: '130px', bottom: '145px' }, '44px', 6);
     this.placeImage(container, ASSETS.tree, { left: '220px', bottom: '145px' }, '52px', 6);
 
+    // Die drei kleinen Tannen sind anklickbar, haben aber keine Spielwirkung.
+    // Ein Klick auf sie zählt als Interaktion und kann so den ersten Vogel holen.
+    // Die erste Fläche endet bei x=84, damit sie den Stock-Hotspot nicht verdeckt.
+    container.appendChild(this.hotspot('42px',  '145px', '42px', '125px', 'pine'));
+    container.appendChild(this.hotspot('130px', '145px', '44px', '125px', 'pine'));
+    container.appendChild(this.hotspot('220px', '145px', '52px', '125px', 'pine'));
+
     // Charlotte steht LINKS NEBEN dem Rodel (kein Überlappen mehr)
     const charlotte = this.placeImage(container, ASSETS.charlotte, { left: '300px', bottom: '145px' }, '72px', 12);
     charlotte.classList.add('charlotte');
@@ -707,8 +720,8 @@ const GAME = {
       container.appendChild(this.hotspot('700px', '136px', '72px', '56px', 'ornament'));
     }
 
-    // Vogel-Logik starten (landet hin und wieder auf dem Schneemann)
-    this.startBird();
+    // Vogel-Logik: Der erste Besuch wartet auf die erste Interaktion (+2 s).
+    this.armFirstBird();
   },
 
   renderIndoor(container) {
@@ -820,10 +833,19 @@ const GAME = {
         this.raceJump();
         return;
       }
+      // Jeder Klick in der Szene zählt als erste Interaktion – auch neben
+      // einem Hotspot. Erst danach darf der Vogel seinen Flug planen.
+      this.handleFirstInteraction();
       const hotspot = e.target.closest('.hotspot');
       if (!hotspot) return;
       this.handleAction(hotspot.dataset.action);
     });
+  },
+
+  handleFirstInteraction() {
+    if (this.firstInteractionDone) return;
+    this.firstInteractionDone = true;
+    this.armFirstBird();
   },
 
   handleAction(action) {
@@ -834,9 +856,16 @@ const GAME = {
       case 'exit': this.leaveTent(); break;
       case 'charlotte': this.clickCharlotte(); break;
       case 'tree': this.clickTree(); break;
+      case 'pine': this.clickPine(); break;
       case 'ornament': this.takeOrnament(); break;
       case 'stick': this.takeStick(); break;
     }
+  },
+
+  /* Die kleinen Tannen sind reine Deko. Ein Klick darauf tut nichts, kann aber
+     den ersten Vogelbesuch auslösen, falls er noch nicht stattgefunden hat. */
+  clickPine() {
+    if (!this.firstBirdDone) this.armFirstBird();
   },
 
   clickSled() {
@@ -1079,12 +1108,16 @@ const GAME = {
   },
 
   /* ---------- Vogel ---------- */
-  startBird() {
-    this.stopBird();
+  /* Der erste Besuch startet erst nach der ersten Interaktion – und dann
+     exakt 2 Sekunden später. Wird vorher die Szene gewechselt, löscht
+     renderScene() den Timer; beim Zurückkehren wird er hier neu gesetzt. */
+  armFirstBird() {
+    if (!this.firstInteractionDone || this.firstBirdDone) return;
+    if (this.scene !== 'outdoor') return;
+    if (this.birdTimer || this.bird) return;
     // Beim ersten Besuch bringt der Vogel den Stock mit.
     this.birdWillDrop = !this.stickDropped && !this.inventory.includes('stick');
-    const delay = this.birdWillDrop ? 900 + Math.random() * 700 : 3000 + Math.random() * 2500;
-    this.birdTimer = setTimeout(() => this.birdLand(), delay);
+    this.birdTimer = setTimeout(() => this.birdLand(), 2000);
   },
 
   stopBird() {
@@ -1108,6 +1141,7 @@ const GAME = {
     if (this.scene !== 'outdoor') return;
     const scene = document.getElementById('scene');
     if (!scene) return;
+    this.firstBirdDone = true;
     const willDrop = this.birdWillDrop;
     this.stopBird();
     this.birdState = 'flying-in';
@@ -1875,6 +1909,8 @@ const GAME = {
     this.ornamentFell = false;
     this.stickDropped = false;
     this.birdWillDrop = false;
+    this.firstInteractionDone = false;
+    this.firstBirdDone = false;
     this.charlotteLine = 0;
     this.repairing = false;
     this.raceActive = false;

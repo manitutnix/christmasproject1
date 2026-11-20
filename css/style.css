@@ -84,7 +84,7 @@ body {
   margin: 0 calc(5px * var(--ui-boost));
 }
 
-/* Vollbild-Schalter oben rechts */
+/* Vollbild-Schalter und Reset oben rechts */
 .fs-btn {
   position: absolute;
   top: calc(8px * var(--ui-boost));
@@ -102,6 +102,13 @@ body {
   cursor: pointer;
 }
 .fs-btn:hover { background: rgba(0,0,0,0.92); }
+.reset-btn {
+  right: calc(44px * var(--ui-boost-strong));
+  color: #ffd1d1;
+  border-color: #ff8c69;
+  font-size: calc(19px * var(--ui-boost-strong));
+}
+.reset-btn:hover { background: rgba(90,15,15,0.92); }
 
 /* Kleiner, nicht blockierender Dreh-Hinweis auf schmalen Portrait-Geräten */
 .orientation-hint {

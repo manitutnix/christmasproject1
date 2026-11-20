@@ -15,7 +15,7 @@ Spielbar auf GitHub Pages:
 - Vollständig relative Pfade – ideal für GitHub Pages
 - Automatische Passgenau-Skalierung auf kleine Displays (16:9, Querformat empfohlen)
 - Vergrößerte UI-Schrift und Touch-Flächen auf kleinen Geräten; kein Leertasten-Hinweis im Spiel
-- Dauerhaft sichtbares Titelbanner „Charlottes Weihnachtszauber“ und Vollbild-Schalter
+- Dauerhaft sichtbares Titelbanner „Charlottes Weihnachtszauber“ sowie Vollbild- und Reset-Schalter oben rechts
 
 ## Lokal starten
 
