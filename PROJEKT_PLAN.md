@@ -138,6 +138,11 @@ Project1/
       springen!“. Effekte rechnen ihre Koordinaten über `sceneCoords()` zurück in
       Szenenpixel – nichts schwebt mehr durch CSS-Scale. Die Baumkugel liegt
       weiter links und hat eine deutlich größere Trefferfläche.
+- [x] **Titelbanner & Vollbild:** „Charlottes Weihnachtszauber“ bleibt als
+      festes Banner oben links sichtbar. Ein Schalter oben rechts startet den
+      Vollbildmodus (`Fullscreen API`, inkl. `webkit`-Fallback, CSS-Pseudo-Vollbild
+      für iOS Safari und best-effort Landscape-Lock auf Mobilgeräten). Die
+      800×450-Szene wird dabei weiterhin nur skaliert, nie gestaucht.
 - [x] Inventarsystem (Hammer, Weihnachtskugel und Stock aufsammeln)
 - [x] **Drei Sammelobjekte:** Der Hammer kommt aus dem Zelt, die Kugel fällt beim
       Baumklick herunter und wird per Hotspot aufgehoben. Der erste Vogel trägt den

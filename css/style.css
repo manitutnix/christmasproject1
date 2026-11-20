@@ -39,6 +39,70 @@ body {
   will-change: transform;
 }
 
+/* Hülle bleibt im Normalmodus unsichtbar, füllt im Vollbild den Bildschirm. */
+#game-shell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 auto;
+}
+#game-shell:fullscreen,
+#game-shell:-webkit-full-screen,
+#game-shell.is-pseudo-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  background: #1a1a2e;
+}
+
+/* Dauerhaft sichtbares Spiele-Banner oben links */
+.title-banner {
+  position: absolute;
+  top: calc(8px * var(--ui-boost));
+  left: calc(8px * var(--ui-boost));
+  z-index: 210;
+  padding: calc(5px * var(--ui-boost)) calc(12px * var(--ui-boost));
+  background: linear-gradient(#8b1a1a, #5a0f0f);
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 0 2px #2b0a0a, 3px 3px 0 rgba(0,0,0,0.45);
+  color: #fff4c1;
+  font-family: inherit;
+  font-size: calc(15px * var(--ui-boost));
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  text-shadow: 2px 2px 0 #2b0a0a;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.title-banner::before,
+.title-banner::after {
+  content: '✦';
+  color: #ffd700;
+  margin: 0 calc(5px * var(--ui-boost));
+}
+
+/* Vollbild-Schalter oben rechts */
+.fs-btn {
+  position: absolute;
+  top: calc(8px * var(--ui-boost));
+  right: calc(8px * var(--ui-boost));
+  z-index: 260;
+  width: calc(30px * var(--ui-boost-strong));
+  height: calc(30px * var(--ui-boost-strong));
+  padding: 0;
+  background: rgba(0,0,0,0.78);
+  border: 2px solid #ffd700;
+  color: #ffec8b;
+  font-family: inherit;
+  font-size: calc(17px * var(--ui-boost-strong));
+  line-height: 1;
+  cursor: pointer;
+}
+.fs-btn:hover { background: rgba(0,0,0,0.92); }
+
 /* Kleiner, nicht blockierender Dreh-Hinweis auf schmalen Portrait-Geräten */
 .orientation-hint {
   display: none;

@@ -7,40 +7,47 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <div id="game-shell">
+    <div id="game">
+      <!-- Szene-Container (dynamisch per JS befüllt) -->
+      <div id="scene" class="scene"></div>
 
-  <div id="game">
-    <!-- Szene-Container (dynamisch per JS befüllt) -->
-    <div id="scene" class="scene"></div>
+      <!-- Spieletitel (dauerhaft sichtbar) -->
+      <div id="title-banner" class="title-banner">Charlottes Weihnachtszauber</div>
 
-    <!-- Hinweis für kleine Portrait-Displays -->
-    <div id="orientation-hint" class="orientation-hint">📱 Querformat empfohlen</div>
+      <!-- Vollbildmodus -->
+      <button id="fullscreen-btn" class="fs-btn" type="button" aria-label="Vollbildmodus" title="Vollbild">⛶</button>
 
-    <!-- Dialogbox unten -->
-    <div id="dialog" class="dialog">
-      <div id="dialog-text">Der Rodel ist kaputt! Hol den Hammer aus dem Zelt und die Kugel vom Baum – gleich lässt der Vogel den Stock fallen.</div>
-    </div>
+      <!-- Hinweis für kleine Portrait-Displays -->
+      <div id="orientation-hint" class="orientation-hint">📱 Querformat empfohlen</div>
 
-    <!-- Inventar -->
-    <div id="inventory" class="inventory">
-      <div class="inv-title"><span class="inv-star">✦</span> Inventar</div>
-      <div id="inv-slots" class="inv-slots"></div>
-      <div id="inv-status" class="inv-status" aria-live="polite">Noch nichts gefunden</div>
-    </div>
+      <!-- Dialogbox unten -->
+      <div id="dialog" class="dialog">
+        <div id="dialog-text">Willkommen! 🎄 Hilf Charlotte, den Rodel zu reparieren.</div>
+      </div>
 
-    <!-- Endbildschirm -->
-    <div id="end-screen" class="end-screen">
-      <div class="end-content">
-        <h1 id="end-title">🎄 Frohe Weihnachten! 🎄</h1>
-        <div class="end-gfx" aria-hidden="true">
-          <div class="end-charlotte">👧</div>
-          <div class="end-sled">🛷</div>
+      <!-- Inventar -->
+      <div id="inventory" class="inventory">
+        <div class="inv-title"><span class="inv-star">✦</span> Inventar</div>
+        <div id="inv-slots" class="inv-slots"></div>
+        <div id="inv-status" class="inv-status" aria-live="polite">Noch nichts gefunden</div>
+      </div>
+
+      <!-- Endbildschirm -->
+      <div id="end-screen" class="end-screen">
+        <div class="end-content">
+          <h1 id="end-title">🎄 Frohe Weihnachten! 🎄</h1>
+          <div class="end-gfx" aria-hidden="true">
+            <div class="end-charlotte">👧</div>
+            <div class="end-sled">🛷</div>
+          </div>
+          <div id="end-sparkle-area" class="end-sparkle-area" aria-hidden="true"></div>
+          <p id="end-message">Charlotte hat den Rodel repariert! Nun kann sie durch die verschneite Winterlandschaft rodeln.</p>
+          <div class="end-stats" id="end-stats">
+            <span id="end-stat-time">Zeit:</span><span id="end-stat-dist">Geweih:</span>
+          </div>
+          <button id="restart-btn">▶  Neu starten</button>
         </div>
-        <div id="end-sparkle-area" class="end-sparkle-area" aria-hidden="true"></div>
-        <p id="end-message">Charlotte hat den Rodel repariert! Nun kann sie durch die verschneite Winterlandschaft rodeln.</p>
-        <div class="end-stats" id="end-stats">
-          <span id="end-stat-time">Zeit:</span><span id="end-stat-dist">Geweih:</span>
-        </div>
-        <button id="restart-btn">▶  Neu starten</button>
       </div>
     </div>
   </div>

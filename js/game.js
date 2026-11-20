@@ -104,6 +104,7 @@ const INVENTORY_ITEMS = {
   stick: { label: 'Stock', icon: ASSETS.stick }
 };
 const REPAIR_ITEMS = ['hammer', 'ornament', 'stick'];
+const WELCOME_TEXT = 'Willkommen! 🎄 Hilf Charlotte, den Rodel zu reparieren.';
 
 const GAME = {
   scene: 'outdoor',
@@ -154,6 +155,7 @@ const GAME = {
     this.invStatus = document.getElementById('inv-status');
     this.endScreen = document.getElementById('end-screen');
     this.restartBtn = document.getElementById('restart-btn');
+    this.fullscreenBtn = document.getElementById('fullscreen-btn');
 
     this.fitToViewport();
     window.addEventListener('resize', () => this.fitToViewport());
@@ -166,6 +168,15 @@ const GAME = {
     this.renderScene();
     this.setupClickHandlers();
     this.restartBtn.addEventListener('click', () => this.restart());
+    this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+
+    const fsChange = () => this.onFullscreenChange();
+    document.addEventListener('fullscreenchange', fsChange);
+    document.addEventListener('webkitfullscreenchange', fsChange);
+    window.addEventListener('keydown', (e) => {
+      const real = document.fullscreenElement || document.webkitFullscreenElement;
+      if (e.key === 'Escape' && !real && this.isFullscreenActive()) this.toggleFullscreen();
+    });
 
     // Tastatur für das Rodelrennen (Leertaste / Pfeil hoch)
     // Lade: Maßgebiger HOLD-Mechanismus — lange halten = hoher Sprung.
@@ -195,7 +206,7 @@ const GAME = {
       if (this.raceChargeTimer) { clearInterval(this.raceChargeTimer); this.raceChargeTimer = null; }
       if (this.raceActive && !this.raceEnded) this.raceJumpRelease();
     });
-    this.say('Der Rodel ist kaputt! Hol den Hammer aus dem Zelt und die Kugel vom Baum – gleich lässt der Vogel den Stock fallen.');
+    this.say(WELCOME_TEXT);
   },
 
   renderScene() {
@@ -751,7 +762,7 @@ const GAME = {
     hearts.id = 'race-hearts';
     hearts.className = 'race-hud';
     hearts.style.left = '16px';
-    hearts.style.top = '12px';
+    hearts.style.top = 'calc(52px * var(--ui-boost))';
     container.appendChild(hearts);
 
     // Fortschrittsbalken (oben)
@@ -1734,6 +1745,102 @@ const GAME = {
     }
   },
 
+  /* ---------- Vollbildmodus ---------- */
+  isFullscreenActive() {
+    const shell = document.getElementById('game-shell');
+    return !!(document.fullscreenElement || document.webkitFullscreenElement ||
+      (shell && shell.classList.contains('is-pseudo-fullscreen')));
+  },
+
+  updateFullscreenButton(active) {
+    const btn = this.fullscreenBtn;
+    if (!btn) return;
+    btn.textContent = active ? '✕' : '⛶';
+    btn.setAttribute('aria-label', active ? 'Vollbild beenden' : 'Vollbildmodus');
+    btn.setAttribute('title', active ? 'Vollbild beenden' : 'Vollbild');
+  },
+
+  refitAfterFullscreenChange() {
+    requestAnimationFrame(() => this.fitToViewport());
+    setTimeout(() => this.fitToViewport(), 120);
+  },
+
+  enterPseudoFullscreen() {
+    const shell = document.getElementById('game-shell');
+    if (!shell || shell.classList.contains('is-pseudo-fullscreen')) return;
+    shell.classList.add('is-pseudo-fullscreen');
+    this.updateFullscreenButton(true);
+    this.refitAfterFullscreenChange();
+  },
+
+  toggleFullscreen() {
+    const shell = document.getElementById('game-shell');
+    if (!shell) return;
+
+    if (this.isFullscreenActive()) {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen;
+        if (exit) {
+          try {
+            const p = exit.call(document);
+            if (p && p.catch) p.catch(() => {});
+          } catch (e) { /* ignore */ }
+        }
+        try {
+          if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+        } catch (e) { /* ignore */ }
+      } else {
+        shell.classList.remove('is-pseudo-fullscreen');
+      }
+      this.updateFullscreenButton(false);
+      this.refitAfterFullscreenChange();
+      return;
+    }
+
+    const request = shell.requestFullscreen || shell.webkitRequestFullscreen;
+    // iOS Safari kennt kein Element-Fullscreen → CSS-Vollbild als Fallback.
+    if (!request) {
+      this.enterPseudoFullscreen();
+      return;
+    }
+    try {
+      const p = request.call(shell);
+      let settled = false;
+      const fallback = () => {
+        if (settled || this.isFullscreenActive()) return;
+        settled = true;
+        this.enterPseudoFullscreen();
+      };
+      if (p && p.then) {
+        p.then(() => { settled = true; }, fallback);
+      }
+      // Manche Browser bleiben bei file:// oder iOS ohne Promise hängen.
+      setTimeout(fallback, 500);
+      // Auf Mobilgeräten im Vollbild quer formatieren, wo unterstützt.
+      if (screen.orientation && screen.orientation.lock) {
+        try {
+          const lock = screen.orientation.lock('landscape');
+          if (lock && lock.catch) lock.catch(() => {});
+        } catch (e) { /* ignore */ }
+      }
+    } catch (e) {
+      this.enterPseudoFullscreen();
+    }
+  },
+
+  onFullscreenChange() {
+    const shell = document.getElementById('game-shell');
+    const real = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (real && shell) shell.classList.remove('is-pseudo-fullscreen');
+    const pseudo = !!(shell && shell.classList.contains('is-pseudo-fullscreen'));
+    if (real || pseudo) {
+      this.updateFullscreenButton(true);
+    } else {
+      this.updateFullscreenButton(false);
+    }
+    this.refitAfterFullscreenChange();
+  },
+
   /* Skaliert die feste 800x450-Szene passgenau in jedes Display.
      Optional mit width/height aufrufbar – praktisch für Tests. */
   fitToViewport(width, height) {
@@ -1778,7 +1885,7 @@ const GAME = {
     this.updateInventory();
     this.hideEndScreen();
     this.renderScene();
-    this.say('Der Rodel ist kaputt! Hol den Hammer aus dem Zelt und die Kugel vom Baum – gleich lässt der Vogel den Stock fallen.');
+    this.say(WELCOME_TEXT);
   },
 
   say(text) {
