@@ -14,6 +14,7 @@ Spielbar auf GitHub Pages:
 - Punkt-und-Klick-Szenen, Inventar, Animationen und WebAudio-Sounds
 - Vollständig relative Pfade – ideal für GitHub Pages
 - Automatische Passgenau-Skalierung auf kleine Displays (16:9, Querformat empfohlen)
+- Vergrößerte UI-Schrift und Touch-Flächen auf kleinen Geräten; kein Leertasten-Hinweis im Spiel
 
 ## Lokal starten
 

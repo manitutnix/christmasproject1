@@ -133,6 +133,11 @@ Project1/
       Orientation-Change). Die interne Pixel-Geometrie bleibt unverändert, damit
       Hotspots, Inventar und Dialog exakt sitzen. Auf kleinen Portrait-Geräten
       erscheint ein dezenter Hinweis auf das Querformat.
+- [x] **Kleine Displays:** UI-Schrift, Inventar und Touch-Flächen werden mit
+      skaliert; der Rodel-Hinweis zeigt auf Touch-Geräten nur noch „Tippe, um zu
+      springen!“. Effekte rechnen ihre Koordinaten über `sceneCoords()` zurück in
+      Szenenpixel – nichts schwebt mehr durch CSS-Scale. Die Baumkugel liegt
+      weiter links und hat eine deutlich größere Trefferfläche.
 - [x] Inventarsystem (Hammer, Weihnachtskugel und Stock aufsammeln)
 - [x] **Drei Sammelobjekte:** Der Hammer kommt aus dem Zelt, die Kugel fällt beim
       Baumklick herunter und wird per Hotspot aufgehoben. Der erste Vogel trägt den

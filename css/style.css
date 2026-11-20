@@ -24,6 +24,10 @@ body {
 #game {
   --bottom-h: 90px;
   --inv-w: 168px;
+  --ui-boost: 1;
+  --ui-boost-strong: 1;
+  --end-boost: 1;
+  --end-strong: 1;
   position: relative;
   width: 800px;
   height: 450px;
@@ -43,11 +47,11 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 250;
-  padding: 5px 10px;
+  padding: calc(5px * var(--ui-boost)) calc(10px * var(--ui-boost));
   background: rgba(0,0,0,0.78);
   border: 2px solid #ffd700;
   color: #ffec8b;
-  font-size: 13px;
+  font-size: calc(13px * var(--ui-boost));
   white-space: nowrap;
   pointer-events: none;
 }
@@ -211,7 +215,7 @@ body {
   background: #fff;
   border: 3px solid #222;
   color: #222;
-  font: bold 20px/24px 'Courier New', monospace;
+  font: bold calc(20px * var(--ui-boost-strong))/24px 'Courier New', monospace;
   text-align: center;
   z-index: 30;
   pointer-events: none;
@@ -445,7 +449,7 @@ body {
 /* squats */
 .race-hud {
   position: absolute;
-  font-size: 26px;
+  font-size: calc(26px * var(--ui-boost));
   z-index: 30;
   pointer-events: none;
   text-shadow: 2px 2px 0 #000;
@@ -457,7 +461,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   width: 0%;
-  height: 10px;
+  height: calc(10px * var(--ui-boost));
   background: #ffd700;
   border: 2px solid #222;
   z-index: 30;
@@ -471,9 +475,9 @@ body {
   transform: translateX(-50%);
   background: rgba(0,0,0,0.7);
   color: #fff;
-  padding: 8px 14px;
+  padding: calc(8px * var(--ui-boost)) calc(14px * var(--ui-boost));
   border: 2px solid #fff;
-  font-size: 16px;
+  font-size: calc(16px * var(--ui-boost-strong));
   z-index: 30;
   pointer-events: none;
   animation: bubblePop 2.2s ease-out forwards;
@@ -491,10 +495,10 @@ body {
 .race-retry-box {
   background: #fff;
   color: #222;
-  padding: 24px 32px;
+  padding: calc(24px * var(--ui-boost)) calc(32px * var(--ui-boost));
   border: 6px solid #8b4513;
   border-radius: 12px;
-  font-size: 22px;
+  font-size: calc(22px * var(--ui-boost));
   text-align: center;
   font-family: 'Courier New', Courier, monospace;
 }
@@ -503,8 +507,8 @@ body {
   background: #ffb6c1;
   border: 2px solid #fff;
   color: #222;
-  padding: 10px 22px;
-  font-size: 16px;
+  padding: calc(10px * var(--ui-boost-strong)) calc(22px * var(--ui-boost-strong));
+  font-size: calc(16px * var(--ui-boost-strong));
   font-family: inherit;
   cursor: pointer;
   border-radius: 6px;
@@ -532,13 +536,13 @@ body {
   height: var(--bottom-h);
   background: rgba(0,0,0,0.85);
   border-top: 4px solid #fff;
-  padding: 12px 18px;
+  padding: calc(12px * var(--ui-boost)) calc(18px * var(--ui-boost));
   display: flex;
   align-items: center;
   z-index: 100;
 }
 #dialog-text {
-  font-size: 18px;
+  font-size: calc(18px * var(--ui-boost));
   line-height: 1.4;
   color: #ffe6e6;
 }
@@ -551,7 +555,7 @@ body {
   width: var(--inv-w);
   height: var(--bottom-h);
   z-index: 100;
-  padding: 6px 8px;
+  padding: calc(6px * var(--ui-boost-strong)) calc(8px * var(--ui-boost-strong));
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -578,26 +582,26 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  margin-bottom: 4px;
+  gap: calc(5px * var(--ui-boost-strong));
+  margin-bottom: calc(4px * var(--ui-boost-strong));
   color: #ffd700;
-  font-size: 11px;
+  font-size: calc(13px * var(--ui-boost-strong));
   font-weight: bold;
   letter-spacing: 1px;
   text-transform: uppercase;
   text-shadow: 1px 1px 0 #3d1f0f;
 }
-.inv-star { color: #ff69b4; font-size: 12px; }
+.inv-star { color: #ff69b4; font-size: calc(14px * var(--ui-boost-strong)); }
 
 .inv-slots {
   display: flex;
   justify-content: center;
-  gap: 5px;
+  gap: calc(5px * var(--ui-boost-strong));
 }
 .inv-slot {
   position: relative;
-  width: 32px;
-  height: 32px;
+  width: calc(32px * var(--ui-boost-strong));
+  height: calc(32px * var(--ui-boost-strong));
   border: 2px solid #a0522d;
   background: rgba(255,255,255,0.07);
   box-shadow: inset 0 0 0 2px rgba(0,0,0,0.35);
@@ -608,7 +612,7 @@ body {
 .inv-slot.is-empty::after {
   content: '·';
   color: rgba(255,255,255,0.28);
-  font-size: 18px;
+  font-size: calc(18px * var(--ui-boost-strong));
   line-height: 1;
 }
 .inv-slot.is-filled {
@@ -625,13 +629,13 @@ body {
   padding: 1px 0;
   background: rgba(0,0,0,0.65);
   color: #ffec8b;
-  font-size: 7px;
+  font-size: calc(11px * var(--ui-boost-strong));
   line-height: 1;
   text-align: center;
 }
 .inv-item-img {
-  width: 24px;
-  height: 22px;
+  width: calc(24px * var(--ui-boost-strong));
+  height: calc(22px * var(--ui-boost-strong));
   margin-top: -3px;
   object-fit: contain;
   image-rendering: pixelated;
@@ -639,11 +643,11 @@ body {
   filter: drop-shadow(1px 1px 0 #2b1a12);
 }
 .inv-status {
-  margin-top: 3px;
+  margin-top: calc(3px * var(--ui-boost-strong));
   color: #ffe6e6;
-  font-size: 9px;
+  font-size: calc(12px * var(--ui-boost-strong));
+  line-height: 1.2;
   text-align: center;
-  white-space: nowrap;
 }
 @keyframes invSlotPop {
   0%   { transform: scale(0.55); opacity: 0; }
@@ -670,41 +674,41 @@ body {
 .end-content {
   background: #fff;
   color: #222;
-  padding: 40px;
+  padding: calc(20px * var(--end-boost));
   border: 6px solid #8b4513;
   border-radius: 12px;
-  max-width: 520px;
+  max-width: calc(520px * var(--end-boost));
   width: 90%;
   font-family: 'Courier New', Courier, monospace;
 }
 
 .end-content h1 {
   color: #d32f2f;
-  font-size: 34px;
-  margin: 0 0 16px 0;
+  font-size: calc(30px * var(--end-boost));
+  margin: 0 0 calc(10px * var(--end-boost)) 0;
   line-height: 1.2;
 }
 
 .end-gfx {
   display: flex;
-  gap: 24px;
+  gap: calc(18px * var(--end-boost));
   justify-content: center;
-  margin: 24px 0;
-  font-size: 64px;
+  margin: calc(10px * var(--end-boost)) 0;
+  font-size: calc(44px * var(--end-boost));
 }
 
 .end-content p {
-  font-size: 18px;
-  line-height: 1.5;
-  margin: 0 0 28px 0;
+  font-size: calc(20px * var(--end-boost));
+  line-height: 1.45;
+  margin: 0 0 calc(14px * var(--end-boost)) 0;
 }
 
 .end-stats {
   display: flex;
   justify-content: center;
-  gap: 12px;
-  margin: 12px 0 20px;
-  font-size: 20px;
+  gap: calc(10px * var(--end-boost));
+  margin: calc(8px * var(--end-boost)) 0 calc(12px * var(--end-boost));
+  font-size: calc(18px * var(--end-boost));
   color: #222;
 }
 .end-stats span { margin: 0 8px; }
@@ -714,8 +718,8 @@ body {
   background: #ffb6c1;
   border: 2px solid #fff;
   color: #222;
-  padding: 12px 28px;
-  font-size: 18px;
+  padding: calc(8px * var(--end-strong)) calc(18px * var(--end-strong));
+  font-size: calc(18px * var(--end-strong));
   font-family: inherit;
   cursor: pointer;
   border-radius: 6px;
@@ -753,6 +757,5 @@ body {
   100% { opacity: 0; transform: translate(var(--dx, -20px), var(--dy, -20px)) scale(0.2); }
 }
 
-@media (max-width: 850px) {
-  #game { width: 95vw; height: calc(95vw * 9 / 16); }
-}
+/* Wichtig: #game bleibt immer 800x450. Die Anpassung erfolgt ausschließlich
+   über transform: scale() in fitToViewport – sonst verrutschen Hotspots. */

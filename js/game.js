@@ -685,15 +685,15 @@ const GAME = {
     if (this.stickDropped && !this.inventory.includes('stick')) {
       const stick = this.placeImage(container, ASSETS.stick, { left: '99px', bottom: '145px' }, '30px', 12);
       stick.classList.add('ground-stick');
-      container.appendChild(this.hotspot('96px', '145px', '36px', '18px', 'stick'));
+      container.appendChild(this.hotspot('84px', '136px', '64px', '36px', 'stick'));
     }
 
     // Heruntergefallene Kugel bleibt liegen, bis Charlotte sie aufhebt
     if (this.ornamentFell && !this.inventory.includes('ornament')) {
-      const ball = this.placeImage(container, ASSETS.ornament, { left: '772px', bottom: '145px' }, '20px', 13);
+      const ball = this.placeImage(container, ASSETS.ornament, { left: '724px', bottom: '145px' }, '20px', 13);
       ball.classList.add('ornament');
       ball.style.transform = 'rotate(320deg)';
-      container.appendChild(this.hotspot('764px', '145px', '32px', '26px', 'ornament'));
+      container.appendChild(this.hotspot('700px', '136px', '72px', '56px', 'ornament'));
     }
 
     // Vogel-Logik starten (landet hin und wieder auf dem Schneemann)
@@ -764,11 +764,32 @@ const GAME = {
     const hint = document.createElement('div');
     hint.id = 'race-hint';
     hint.className = 'race-hint';
-    hint.textContent = 'Tippe / Leertaste = springen!';
+    // Auf Touch-Geräten ist der Leertasten-Hinweis irritierend – tippen genügt.
+    // Die Tastatursteuerung bleibt trotzdem aktiv.
+    hint.textContent = 'Tippe, um zu springen!';
     container.appendChild(hint);
     setTimeout(() => { if (hint.parentNode) hint.remove(); }, 2200);
 
     this.raceUpdateHud();
+  },
+
+  /* ---------- Koordinaten-Helfer ---------- */
+  /* getBoundingClientRect() liefert Viewport-Pixel. Unter dem CSS-scale von
+     #game müssen diese Werte zurück in die festen 800x450-Szenenkoordinaten. */
+  sceneCoords(el, scene) {
+    const sc = scene || document.getElementById('scene');
+    if (!el || !sc) return null;
+    const r = el.getBoundingClientRect();
+    const s = sc.getBoundingClientRect();
+    const scale = s.width / (sc.offsetWidth || 800) || 1;
+    return {
+      left: (r.left - s.left) / scale,
+      top: (r.top - s.top) / scale,
+      right: (r.right - s.left) / scale,
+      bottom: (s.bottom - r.bottom) / scale,
+      width: r.width / scale,
+      height: r.height / scale
+    };
   },
 
   /* ---------- Hotspot-Helfer ---------- */
@@ -958,7 +979,7 @@ const GAME = {
     }
     if (!this.inventory.includes('ornament')) {
       return this.ornamentFell
-        ? 'Die Kugel liegt ganz rechts im Schnee – klick direkt darauf.'
+        ? 'Die Kugel liegt direkt vor dem Weihnachtsbaum im Schnee – klick darauf.'
         : 'Klick auf den Weihnachtsbaum ganz rechts – dann fällt eine Kugel herunter.';
     }
     if (!this.inventory.includes('stick')) {
@@ -972,13 +993,13 @@ const GAME = {
   showQuestionBubble(sprite) {
     const scene = document.getElementById('scene');
     if (!scene || !sprite) return;
-    const sr = sprite.getBoundingClientRect();
-    const cr = scene.getBoundingClientRect();
+    const p = this.sceneCoords(sprite, scene);
+    if (!p) return;
     const bubble = document.createElement('div');
     bubble.className = 'question-bubble';
     bubble.textContent = '?';
-    bubble.style.left = Math.round(sr.left - cr.left + sr.width / 2 - 15) + 'px';
-    bubble.style.top = Math.round(sr.top - cr.top - 30) + 'px';
+    bubble.style.left = Math.round(p.left + p.width / 2 - 15) + 'px';
+    bubble.style.top = Math.round(p.top - 30) + 'px';
     scene.appendChild(bubble);
     setTimeout(() => bubble.remove(), 1400);
   },
@@ -1019,24 +1040,31 @@ const GAME = {
       if (hotspotPlaced || this.scene !== 'outdoor' || this.inventory.includes('ornament')) return;
       if (document.querySelector('.hotspot[data-action="ornament"]')) return;
       hotspotPlaced = true;
-      scene.appendChild(this.hotspot('764px', '145px', '32px', '26px', 'ornament'));
+      scene.appendChild(this.hotspot('700px', '136px', '72px', '56px', 'ornament'));
     };
 
     const anim = ball.animate([
       { left: '742px', bottom: '215px', transform: 'rotate(0deg)',   offset: 0 },
-      { left: '760px', bottom: '172px', transform: 'rotate(140deg)', offset: 0.5 },
-      { left: '770px', bottom: '145px', transform: 'rotate(240deg)', offset: 0.8 },
-      { left: '774px', bottom: '157px', transform: 'rotate(290deg)', offset: 0.9 },
-      { left: '772px', bottom: '145px', transform: 'rotate(320deg)', offset: 1 }
+      { left: '734px', bottom: '172px', transform: 'rotate(140deg)', offset: 0.5 },
+      { left: '726px', bottom: '145px', transform: 'rotate(240deg)', offset: 0.8 },
+      { left: '728px', bottom: '157px', transform: 'rotate(290deg)', offset: 0.9 },
+      { left: '724px', bottom: '145px', transform: 'rotate(320deg)', offset: 1 }
     ], { duration: 1250, easing: 'ease-in', fill: 'forwards' });
-    anim.onfinish = () => {
-      ball.style.left = '772px';
+
+    // Fallback: auch wenn die Animation im Hintergrund-Tab nicht läuft,
+    // landet die Kugel sichtbar an ihrer finalen Position.
+    let dropDone = false;
+    const finishDrop = () => {
+      if (dropDone) return;
+      dropDone = true;
+      ball.style.left = '724px';
       ball.style.bottom = '145px';
       ball.style.transform = 'rotate(320deg)';
       try { anim.cancel(); } catch (e) { /* ignore */ }
       placeHotspot();
     };
-    setTimeout(placeHotspot, 1350);
+    anim.onfinish = finishDrop;
+    setTimeout(finishDrop, 1400);
   },
 
   /* ---------- Vogel ---------- */
@@ -1139,10 +1167,10 @@ const GAME = {
     if (!scene) return;
 
     // Aktuelle Position übernehmen, damit der Abflug nahtlos beginnt
-    const sr = scene.getBoundingClientRect();
-    const br = bird.getBoundingClientRect();
-    const startLeft = Math.round(br.left - sr.left);
-    const startBottom = Math.round(sr.bottom - br.bottom);
+    const p = this.sceneCoords(bird, scene);
+    if (!p) return;
+    const startLeft = Math.round(p.left);
+    const startBottom = Math.round(p.bottom);
     bird.style.left = startLeft + 'px';
     bird.style.bottom = startBottom + 'px';
 
@@ -1193,10 +1221,10 @@ const GAME = {
       if (!this.birdCarryStick || !this.birdCarryEl || !this.bird || this.scene !== 'outdoor') return;
       const scene = document.getElementById('scene');
       if (!scene) return;
-      const birdRect = this.bird.getBoundingClientRect();
-      const sceneRect = scene.getBoundingClientRect();
-      const left = Math.round(birdRect.left - sceneRect.left + 7);
-      const bottom = Math.round(sceneRect.bottom - birdRect.bottom - 4);
+      const p = this.sceneCoords(this.bird, scene);
+      if (!p) return;
+      const left = Math.round(p.left + 7);
+      const bottom = Math.round(p.bottom - 4);
       this.birdCarryEl.style.left = left + 'px';
       this.birdCarryEl.style.bottom = bottom + 'px';
       if (left >= 99) {
@@ -1223,10 +1251,10 @@ const GAME = {
     this.birdCarryEl = null;
     if (!scene || !stick.parentNode) return;
 
-    const sceneRect = scene.getBoundingClientRect();
-    const stickRect = stick.getBoundingClientRect();
-    const startLeft = Math.round(stickRect.left - sceneRect.left);
-    const startBottom = Math.round(sceneRect.bottom - stickRect.bottom);
+    const p = this.sceneCoords(stick, scene);
+    if (!p) return;
+    const startLeft = Math.round(p.left);
+    const startBottom = Math.round(p.bottom);
     stick.style.width = '30px';
     stick.style.left = startLeft + 'px';
     stick.style.bottom = startBottom + 'px';
@@ -1242,7 +1270,7 @@ const GAME = {
       stick.style.bottom = '145px';
       stick.style.transform = 'none';
       if (this.scene === 'outdoor' && !document.querySelector('.hotspot[data-action="stick"]')) {
-        document.getElementById('scene').appendChild(this.hotspot('96px', '145px', '36px', '18px', 'stick'));
+        document.getElementById('scene').appendChild(this.hotspot('84px', '136px', '64px', '36px', 'stick'));
       }
     };
     const fallAnim = stick.animate([
@@ -1307,7 +1335,8 @@ const GAME = {
     if (!scene) return;
     const rider = document.querySelector('.race-rider');
     const speed = this.raceSpeed || 230;
-    const baseX = rider ? rider.getBoundingClientRect().left + 40 : 95;
+    const riderPos = rider ? this.sceneCoords(rider, scene) : null;
+    const baseX = riderPos ? riderPos.left + 40 : 95;
     const n = 2 + Math.floor(speed / 120);
     for (let i = 0; i < n; i++) {
       const d = document.createElement('div');
@@ -1455,14 +1484,16 @@ const GAME = {
         }
         const scene = document.getElementById('scene');
         if (scene && rider) {
-          const r = rider.getBoundingClientRect();
-          for (let k = 0; k < 4; k++) {
-            const sp = document.createElement('div');
-            sp.className = 'race-sparkle';
-            sp.style.left = (r.left + Math.random() * r.width) + 'px';
-            sp.style.bottom = (r.bottom + 2) + 'px';
-            scene.appendChild(sp);
-            setTimeout(() => sp.remove(), 900);
+          const p = this.sceneCoords(rider, scene);
+          if (p) {
+            for (let k = 0; k < 4; k++) {
+              const sp = document.createElement('div');
+              sp.className = 'race-sparkle';
+              sp.style.left = (p.left + Math.random() * p.width) + 'px';
+              sp.style.bottom = (p.bottom + 2) + 'px';
+              scene.appendChild(sp);
+              setTimeout(() => sp.remove(), 900);
+            }
           }
         }
         if (this.raceHearts <= 0) { this.endRace(false); return; }
@@ -1521,15 +1552,17 @@ const GAME = {
 
     const scene = document.getElementById('scene');
     if (scene && rider) {
-      const r = rider.getBoundingClientRect();
-      for (let k = 0; k < 10; k++) {
-        const sp = document.createElement('div');
-        sp.className = 'race-sparkle';
-        sp.style.left = (r.left + Math.random() * r.width) + 'px';
-        sp.style.bottom = (r.bottom + Math.random() * 12) + 'px';
-        sp.style.animationDelay = (k * 0.06) + 's';
-        scene.appendChild(sp);
-        setTimeout(() => sp.remove(), 1100);
+      const p = this.sceneCoords(rider, scene);
+      if (p) {
+        for (let k = 0; k < 10; k++) {
+          const sp = document.createElement('div');
+          sp.className = 'race-sparkle';
+          sp.style.left = (p.left + Math.random() * p.width) + 'px';
+          sp.style.bottom = (p.bottom + Math.random() * 12) + 'px';
+          sp.style.animationDelay = (k * 0.06) + 's';
+          scene.appendChild(sp);
+          setTimeout(() => sp.remove(), 1100);
+        }
       }
     }
     this.raceFinishTimer = setTimeout(() => this.endRace(true), 1250);
@@ -1552,8 +1585,8 @@ const GAME = {
 
     const scene = document.getElementById('scene');
     if (!scene) return;
-    const base = sled.getBoundingClientRect();
-    if (base.right > 800 + 60) return; // unsichtbar
+    const base = this.sceneCoords(sled, scene);
+    if (!base || base.right > 800 + 60) return; // unsichtbar
 
     const dust = document.createElement('div');
     dust.className = 'race-trail-dust';
@@ -1625,6 +1658,9 @@ const GAME = {
     const msg = document.getElementById('end-message');
     const dist = document.getElementById('end-stat-dist');
     const stats = document.getElementById('end-stats');
+    // Erst sichtbar machen, sonst liefert getBoundingClientRect() Nullwerte
+    // und die Funken landen außerhalb der Szene.
+    this.endScreen.style.display = 'flex';
     if (this.raceWon) {
       title.textContent = '🎄 FROHE WEIHNACHTEN! 🎄';
       msg.textContent = 'Charlotte hat das Rodel bis zum Ziel gerollt! 🎉';
@@ -1637,7 +1673,6 @@ const GAME = {
       stats.style.display = 'none';
     }
     this.spawnEndDrifts();
-    this.endScreen.style.display = 'flex';
   },
 
   hideEndScreen() {
@@ -1679,9 +1714,11 @@ const GAME = {
     const scene = document.getElementById('scene');
     if (!scene) return;
     const title = document.getElementById('end-title');
-    const r = title.getBoundingClientRect();
+    const r = this.sceneCoords(title, scene);
+    if (!r) return;
     const area = document.getElementById('end-sparkle-area');
     if (!area) return;
+    area.querySelectorAll('.end-spark').forEach(sp => sp.remove());
     for (let i = 0; i < 12; i++) {
       const sp = document.createElement('div');
       sp.className = 'end-spark';
@@ -1707,8 +1744,20 @@ const GAME = {
     const pad = 12;
     const raw = Math.min((vw - pad) / 800, (vh - pad) / 450, 1);
     const scale = Math.max(0.2, raw);
+    // UI-Schrift wächst bei kleiner Scale mit, damit sie lesbar bleibt.
+    const uiBoost = Math.min(2.2, Math.max(1, 0.62 / scale));
+    const strongBoost = Math.min(2.8, Math.max(1, 0.85 / scale));
+    // Endbildschirm darf nicht zu hoch werden – daher ein gedeckelter Boost.
+    const endBoost = Math.min(1.35, uiBoost);
+    const endStrong = Math.min(1.6, strongBoost);
     game.style.transform = 'scale(' + scale + ')';
     game.dataset.scale = scale.toFixed(3);
+    game.style.setProperty('--ui-boost', uiBoost.toFixed(3));
+    game.style.setProperty('--ui-boost-strong', strongBoost.toFixed(3));
+    game.style.setProperty('--end-boost', endBoost.toFixed(3));
+    game.style.setProperty('--end-strong', endStrong.toFixed(3));
+    game.style.setProperty('--bottom-h', Math.round(90 * uiBoost) + 'px');
+    game.style.setProperty('--inv-w', Math.round(168 * uiBoost) + 'px');
   },
 
   restart() {
