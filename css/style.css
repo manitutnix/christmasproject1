@@ -1,0 +1,729 @@
+/* Weihnachtszauber mit Charlotte – Pixel-Art Look */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #1a1a2e;
+  color: #fff;
+  font-family: 'Courier New', Courier, monospace;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  image-rendering: pixelated;
+}
+
+#game {
+  --bottom-h: 90px;
+  --inv-w: 168px;
+  position: relative;
+  width: 800px;
+  height: 450px;
+  background: #87ceeb;
+  box-shadow: 0 0 0 4px #222, 0 0 25px rgba(0,0,0,0.6);
+  overflow: hidden;
+}
+
+/* Retro-Glasaf: leichtes Noise über der gesamten Szene */
+#game::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  opacity: 0.04;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(0,0,0,0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(0,0,0,0.10) 0%, transparent 50%),
+    url("../assets/retro-noise.svg");
+  background-repeat: repeat;
+}
+
+/* Szene */
+.scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+/* Hintergrund-Ebene (SVG-Landschaft) */
+.scene-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Pixel-Art Sprites (PNG, scharf skaliert) */
+.pixel-sprite {
+  position: absolute;
+  image-rendering: pixelated;      /* Chrome/Edge/Firefox */
+  image-rendering: crisp-edges;    /* Firefox Alternative */
+  image-rendering: -moz-crisp-edges;
+  pointer-events: none;            /* Klicks gehen an Hotspots */
+  user-select: none;
+}
+
+/* Weiche Lichtscheine / Glows hinter Objekten */
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Vignette über der Szene für den Kino-Look */
+.scene-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 15;
+  background: radial-gradient(ellipse at 50% 45%,
+              rgba(0,0,0,0) 50%, rgba(6,18,30,0.42) 100%);
+}
+
+/* ============================================================
+   Animationen
+   ============================================================ */
+
+/* Vogel: klickbar, fliegt über die Szene */
+.pixel-sprite.bird {
+  pointer-events: auto;
+  cursor: pointer;
+  will-change: left, bottom;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.25));
+  /* Vögel blicken in Flugrichtung (nach rechts); beim Sitzen zeigen
+     sie nach links (Original-Sprite). */
+}
+.pixel-sprite.bird.flying {
+  transform: scaleX(-1);
+}
+.pixel-sprite.bird.perched {
+  animation: birdPerch 2.4s ease-in-out infinite;
+  transform-origin: 50% 100%;
+}
+@keyframes birdPerch {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%      { transform: translateY(-1px) rotate(-2deg); }
+}
+
+/* Rauch: sanft aufsteigende Schwaden */
+.smoke .puff {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: smokeRise 6.5s ease-in-out infinite;
+}
+.smoke .puff:nth-child(2) { animation-delay: 1.8s; animation-duration: 7.5s; }
+.smoke .puff:nth-child(3) { animation-delay: 3.6s; animation-duration: 8.5s; }
+@keyframes smokeRise {
+  0%   { opacity: 0;    transform: translate(0, 6px) scale(0.55); }
+  18%  { opacity: 0.45; }
+  60%  { opacity: 0.26; }
+  100% { opacity: 0;    transform: translate(7px, -20px) scale(1.5); }
+}
+
+/* Drei Sterne: subtiles Leuchten */
+.star {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: starTwinkle 3.8s ease-in-out infinite;
+}
+.stars > g:nth-of-type(2) .star { animation-delay: 1.1s; animation-duration: 4.6s; }
+.stars > g:nth-of-type(3) .star { animation-delay: 2.2s; animation-duration: 3.2s; }
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.4; transform: scale(0.82); }
+  50%      { opacity: 1;   transform: scale(1.1); }
+}
+
+/* Kerze im Zelt: leichtes Flackern */
+.candle-flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: flameFlicker 1.7s ease-in-out infinite;
+}
+.candle-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: candlePulse 2.6s ease-in-out infinite;
+}
+@keyframes flameFlicker {
+  0%, 100% { transform: scale(1, 1) translateX(0);          opacity: 1; }
+  25%      { transform: scale(0.92, 1.12) translateX(0.4px); opacity: 0.9; }
+  50%      { transform: scale(1.06, 0.9) translateX(-0.4px); opacity: 1; }
+  75%      { transform: scale(0.96, 1.06) translateX(0.2px); opacity: 0.94; }
+}
+@keyframes candlePulse {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.09); }
+}
+
+/* Charlotte: fragendes Schütteln */
+.charlotte.shrug {
+  animation: charlotteShrug 0.9s ease-in-out;
+  transform-origin: 50% 100%;
+}
+@keyframes charlotteShrug {
+  0%   { transform: rotate(0deg) translateY(0); }
+  15%  { transform: rotate(-6deg) translateY(-2px); }
+  35%  { transform: rotate(6deg)  translateY(-2px); }
+  55%  { transform: rotate(-4deg) translateY(-1px); }
+  75%  { transform: rotate(4deg)  translateY(-1px); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
+/* Fragezeichen-Sprechblase */
+.question-bubble {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: #fff;
+  border: 3px solid #222;
+  color: #222;
+  font: bold 20px/24px 'Courier New', monospace;
+  text-align: center;
+  z-index: 30;
+  pointer-events: none;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+  animation: bubblePop 1.3s ease-out forwards;
+}
+.question-bubble::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  bottom: -9px;
+  border: 6px solid transparent;
+  border-top-color: #222;
+}
+.question-bubble::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  bottom: -5px;
+  border: 4px solid transparent;
+  border-top-color: #fff;
+  z-index: 1;
+}
+@keyframes bubblePop {
+  0%   { opacity: 0; transform: translateY(6px) scale(0.6); }
+  20%  { opacity: 1; transform: translateY(0) scale(1.1); }
+  30%  { transform: translateY(0) scale(1); }
+  75%  { opacity: 1; transform: translateY(-3px) scale(1); }
+  100% { opacity: 0; transform: translateY(-10px) scale(0.95); }
+}
+
+/* Weihnachtsbaum: kurze Pseudo-Drehung */
+.christmas-tree.tree-spin {
+  animation: treeSpin 0.95s ease-in-out;
+  transform-origin: 50% 100%;
+}
+@keyframes treeSpin {
+  0%   { transform: scaleX(1); }
+  18%  { transform: scaleX(0.12); }
+  36%  { transform: scaleX(-0.4); }
+  55%  { transform: scaleX(0.55); }
+  75%  { transform: scaleX(-0.15); }
+  100% { transform: scaleX(1); }
+}
+
+/* Herabfallende Weihnachtskugel */
+.pixel-sprite.ornament {
+  filter: drop-shadow(1px 2px 1px rgba(0,0,0,0.35));
+}
+
+/* Liegender Stock im Schnee */
+.pixel-sprite.ground-stick {
+  filter: drop-shadow(1px 2px 1px rgba(0,0,0,0.35));
+}
+
+/* Vogel trägt den Stock – fällt dann in die Tannen-Lücke */
+.pixel-sprite.bird-carried-stick,
+.pixel-sprite.falling-stick {
+  pointer-events: none;
+  filter: drop-shadow(1px 2px 1px rgba(0,0,0,0.4));
+}
+
+/* Reparatur-Animation: Hammer, der zuschlägt */
+.pixel-sprite.repair-hammer {
+  pointer-events: none;
+  filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.4));
+  transform-origin: 50% 50%;
+}
+
+/* Reparatur-Funken */
+.repair-spark {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  pointer-events: none;
+  z-index: 17;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffbe0 0%, #ffd700 35%, rgba(255,180,0,0) 70%);
+  animation: sparkBurst 0.6s ease-out forwards;
+}
+@keyframes sparkBurst {
+  0%   { opacity: 1; transform: scale(0.3); }
+  50%  { opacity: 1; transform: scale(1.5); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
+/* ------------------- Rodelrennen (Alles) ------------------- */
+
+/* Charlotte sitzt auf dem Rodel: kleines Wippen, leicht vorwärts geneigt. */
+.race-rider {
+  animation: raceRiderBob 0.36s ease-in-out infinite;
+  transform-origin: 50% 92%;
+  filter: drop-shadow(0 2px 1px rgba(0,0,0,0.25));
+}
+@keyframes raceRiderBob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  25%      { transform: translateY(-2px) rotate(-2deg); }
+  50%      { transform: translateY(0) rotate(-1deg); }
+  75%      { transform: translateY(-1px) rotate(-2.5deg); }
+}
+.race-rider.race-fast { animation-duration: 0.26s; }
+
+.race-rider.race-squash {
+  animation: raceRiderSquash 0.26s ease-out;
+}
+@keyframes raceRiderSquash {
+  0%   { transform: scale(1, 1) rotate(-1deg); }
+  35%  { transform: scale(1.06, 0.94) rotate(-2deg); }
+  100% { transform: scale(1, 1) rotate(-1deg); }
+}
+
+.race-rider.stumble {
+  animation: raceRiderStumble 0.45s ease-out;
+}
+@keyframes raceRiderStumble {
+  0%   { transform: translateY(0) rotate(-1deg); }
+  20%  { transform: translateY(4px) rotate(-9deg); }
+  50%  { transform: translateY(-4px) rotate(6deg); }
+  100% { transform: translateY(0) rotate(-1deg); }
+}
+
+/* Ziel-Einfahrt: der Rodel fährt sichtbar nach rechts durch das Banner. */
+.race-rider.race-finish-run {
+  animation: raceFinishRun 1.22s cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
+}
+@keyframes raceFinishRun {
+  0%   { left: 80px;  transform: translateY(0) rotate(-1deg); }
+  30%  { transform: translateY(-6px) rotate(-4deg); }
+  100% { left: 664px; transform: translateY(-2px) rotate(-3deg); }
+}
+
+/* Das Ziel bleibt unsichtbar, bis es kurz vor dem Finish eingeblendet wird. */
+#race-finish-gate {
+  opacity: 0;
+  pointer-events: none;
+}
+#race-finish-gate.race-gate-visible {
+  animation: raceGateReveal 0.55s ease-out forwards;
+}
+@keyframes raceGateReveal {
+  0%   { opacity: 0; transform: translateX(42px); }
+  65%  { opacity: 1; transform: translateX(-5px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Straßenstreifen: deutlich sichtbar nach links scrollende Markierungen. */
+.race-speed-streak {
+  position: absolute;
+  left: -132px;
+  width: calc(100% + 264px);
+  height: 6px;
+  pointer-events: none;
+  z-index: 5;
+  background: repeating-linear-gradient(90deg,
+    transparent 0, transparent 34px,
+    rgba(120,170,205,0.85) 34px, rgba(120,170,205,0.85) 44px,
+    rgba(255,255,255,0.95) 44px, rgba(255,255,255,0.95) 96px,
+    transparent 96px, transparent 132px);
+  animation: speedStreak 0.5s linear infinite;
+  will-change: transform;
+}
+@keyframes speedStreak {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-132px); }
+}
+
+/* SoFE: Hintergrund schwankt leicht (für den 2D-Effekt) */
+#scene.race .scene-bg {
+  animation: raceBgSway 12s ease-in-out infinite;
+}
+@keyframes raceBgSway {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(-14px); }
+}
+
+/* Trail-Staub fliegt mit, wenn Sled schneller raste. */
+.race-trail-dot {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fffbe0;
+  pointer-events: none;
+  z-index: 5;
+  animation: raceTrailFade 0.5s ease-out forwards;
+}
+@keyframes raceTrailFade {
+  0%   { opacity: 0.8; transform: scale(1.05); }
+  100% { opacity: 0; transform: scale(0.7) translateY(2px); }
+}
+
+/* Sparkle: Sprühen über den Rodel, wenn er schnell ist. */
+.race-sparkle {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff7e0 0%, #ffc90e 40%, rgba(255,180,0,0) 80%);
+  pointer-events: none;
+  z-index: 8;
+  animation: raceSparklePop 0.6s ease-out forwards;
+}
+@keyframes raceSparklePop {
+  0%   { opacity: 0; transform: scale(0.3); }
+  20%  { opacity: 1; transform: scale(1); }
+  45%  { transform: translateY(-22px); }
+  60%  { transform: translateY(-18px); }
+  100% { opacity: 0; transform: translateY(-36px); }
+}
+
+/* Schneefädchen mit leichtem Wieherein. */
+.snow-drift {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #f0f8ff;
+  box-shadow: 0 0 4px 1px rgba(240, 248, 255, 0.5);
+  pointer-events: none;
+  z-index: 4;
+  opacity: 0;
+  animation: snowDrift linear 0.8s;
+}
+@keyframes snowDrift {
+  0%   { opacity: 0; transform: translate(-10px, -30px) rotate(0deg); }
+  100% { opacity: 0.8; transform: translate(0, 18px) rotate(60deg); }
+}
+
+/* ------------------- Rodelrennen (Alles) ------------------- */
+
+/* squats */
+.race-hud {
+  position: absolute;
+  font-size: 26px;
+  z-index: 30;
+  pointer-events: none;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.race-progress {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0%;
+  height: 10px;
+  background: #ffd700;
+  border: 2px solid #222;
+  z-index: 30;
+  transition: width 0.1s linear;
+}
+
+.race-hint {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 8px 14px;
+  border: 2px solid #fff;
+  font-size: 16px;
+  z-index: 30;
+  pointer-events: none;
+  animation: bubblePop 2.2s ease-out forwards;
+}
+
+.race-retry {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.55);
+  z-index: 40;
+}
+.race-retry-box {
+  background: #fff;
+  color: #222;
+  padding: 24px 32px;
+  border: 6px solid #8b4513;
+  border-radius: 12px;
+  font-size: 22px;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+}
+.race-retry-box button {
+  margin-top: 14px;
+  background: #ffb6c1;
+  border: 2px solid #fff;
+  color: #222;
+  padding: 10px 22px;
+  font-size: 16px;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.race-retry-box button:hover { background: #ffc0cb; }
+
+/* Hotspots (unsichtbare Klickflächen) */
+.hotspot {
+  position: absolute;
+  cursor: pointer;
+  opacity: 0;
+  z-index: 20;
+}
+.hotspot:hover {
+  opacity: 0.2;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Dialogbox – links unten, endet direkt vor dem Inventar */
+.dialog {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: var(--inv-w);
+  height: var(--bottom-h);
+  background: rgba(0,0,0,0.85);
+  border-top: 4px solid #fff;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  z-index: 100;
+}
+#dialog-text {
+  font-size: 18px;
+  line-height: 1.4;
+  color: #ffe6e6;
+}
+
+/* Inventar: Werkzeuggürtel unten rechts, gleiche Höhe wie die Dialogbox */
+.inventory {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: var(--inv-w);
+  height: var(--bottom-h);
+  z-index: 100;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(#2b1a12, #3d1f0f);
+  border: 3px solid #ffec8b;
+  border-top: 4px solid #fff;
+  box-shadow: 0 0 0 3px #3d1f0f, inset 0 0 0 2px #8b5a2b;
+  font-family: 'Courier New', Courier, monospace;
+  pointer-events: none;
+}
+.inventory::before,
+.inventory::after {
+  content: '';
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #ffd700;
+  box-shadow: 0 0 0 1px #3d1f0f;
+}
+.inventory::before { top: -4px; left: -4px; }
+.inventory::after  { top: -4px; right: -4px; }
+
+.inv-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 4px;
+  color: #ffd700;
+  font-size: 11px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 0 #3d1f0f;
+}
+.inv-star { color: #ff69b4; font-size: 12px; }
+
+.inv-slots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+.inv-slot {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  border: 2px solid #a0522d;
+  background: rgba(255,255,255,0.07);
+  box-shadow: inset 0 0 0 2px rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.inv-slot.is-empty::after {
+  content: '·';
+  color: rgba(255,255,255,0.28);
+  font-size: 18px;
+  line-height: 1;
+}
+.inv-slot.is-filled {
+  border-color: #ffd700;
+  background: rgba(255,215,0,0.14);
+  animation: invSlotPop 0.34s ease-out;
+}
+.inv-slot.is-filled::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 1px 0;
+  background: rgba(0,0,0,0.65);
+  color: #ffec8b;
+  font-size: 7px;
+  line-height: 1;
+  text-align: center;
+}
+.inv-item-img {
+  width: 24px;
+  height: 22px;
+  margin-top: -3px;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(1px 1px 0 #2b1a12);
+}
+.inv-status {
+  margin-top: 3px;
+  color: #ffe6e6;
+  font-size: 9px;
+  text-align: center;
+  white-space: nowrap;
+}
+@keyframes invSlotPop {
+  0%   { transform: scale(0.55); opacity: 0; }
+  70%  { transform: scale(1.14); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* --- Endbildschirm --- */
+.end-screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 200;
+  text-align: center;
+}
+
+.end-content {
+  background: #fff;
+  color: #222;
+  padding: 40px;
+  border: 6px solid #8b4513;
+  border-radius: 12px;
+  max-width: 520px;
+  width: 90%;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.end-content h1 {
+  color: #d32f2f;
+  font-size: 34px;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.end-gfx {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  margin: 24px 0;
+  font-size: 64px;
+}
+
+.end-content p {
+  font-size: 18px;
+  line-height: 1.5;
+  margin: 0 0 28px 0;
+}
+
+.end-stats {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 12px 0 20px;
+  font-size: 20px;
+  color: #222;
+}
+.end-stats span { margin: 0 8px; }
+.end-stats span#end-stat-dist { font-weight: bold; color: #2e8b57; }
+
+.end-content button {
+  background: #ffb6c1;
+  border: 2px solid #fff;
+  color: #222;
+  padding: 12px 28px;
+  font-size: 18px;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 6px;
+}
+.end-content button:hover { background: #ffc0cb; }
+
+#end-title {
+  text-shadow: 3px 3px 0 #000, 0 0 14px rgba(255,255,255,0.5);
+  letter-spacing: -0.6px;
+  transition: transform 0.15s ease;
+}
+#end-title:hover { transform: scale(1.06); }
+
+.end-sparkle-area {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 2;
+}
+.end-spark {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffefc8;
+  box-shadow: 0 0 6px #ffd9a5, 0 0 14px #ffb266;
+  opacity: 0;
+  animation: endSpark var(--dur, 1.2s) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+.end-spark:nth-child(odd) { background: #fff4e0; }
+@keyframes endSpark {
+  0%   { opacity: 0; transform: translate(0, 0) scale(0); }
+  12%  { opacity: 1; transform: translate(var(--dx, -20px), var(--dy, -20px)) scale(1); }
+  100% { opacity: 0; transform: translate(var(--dx, -20px), var(--dy, -20px)) scale(0.2); }
+}
+
+@media (max-width: 850px) {
+  #game { width: 95vw; height: calc(95vw * 9 / 16); }
+}

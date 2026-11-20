@@ -1,0 +1,45 @@
+# Weihnachtszauber mit Charlotte
+
+Ein kleines, browserbasiertes Retro-Pixel-Adventure auf Deutsch: Charlotte sammelt
+**Hammer**, **Weihnachtskugel** und **Stock**, repariert den Rodel und fährt ein
+kurzes Rennen bis ins Ziel.
+
+- Reine Web-Technik: HTML5, CSS3, Vanilla JavaScript
+- Kein Framework, kein Build-Schritt, kein Server nötig
+- Punkt-und-Klick-Szenen, Inventar, Animationen und WebAudio-Sounds
+- Vollständig relative Pfade – ideal für GitHub Pages
+
+## Lokal starten
+
+Einfach `index.html` in einem modernen Browser öffnen. Alternativ im Projektordner
+ein kleiner statischer Server, falls gewünscht:
+
+```powershell
+python -m http.server 8000
+```
+
+Danach `http://localhost:8000` aufrufen.
+
+## Spielablauf
+
+1. Im Zelt die Werkzeugkiste öffnen und den Hammer nehmen.
+2. Den Weihnachtsbaum anklicken – eine Kugel fällt herunter und wird aufgehoben.
+3. Der erste Vogel lässt den Stock ganz links zwischen den Tannen fallen.
+4. Mit allen drei Teilen auf den Rodel klicken und das Rennen gewinnen.
+5. Charlotte gibt auf wiederholte Klicks immer genauere Tipps.
+
+## Struktur
+
+- `index.html` – Spielgerüst, Dialog, Inventar, Endbildschirm
+- `css/style.css` – Retro-Layout und Animationen
+- `js/game.js` – Spiellogik, Szenen und Asset-Pfade
+- `assets/game/` – Laufzeit-Sprites
+- `assets/source/` – 1x-Master-Canvas für spätere Sprite-Arbeit
+- `assets/retro-noise.svg` – Retro-Overlay
+- `docs/Gemini_Generated_a3.jpg` – lokale Stil-Referenz (nicht im Git-Repo)
+- `PROJEKT_PLAN.md` – ausführliche deutsche Projektdokumentation
+- `DEPLOYMENT.md` – Anleitung für GitHub Pages
+
+## Deployment
+
+Siehe [DEPLOYMENT.md](DEPLOYMENT.md).
