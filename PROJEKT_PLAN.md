@@ -128,6 +128,11 @@ Project1/
 - [x] **Außenbereich detailreicher gestaltet:** Wintersonne, Hütten mit Rauch, Schneemann, Schneewehen, Fußspuren, fallender Schnee
 - [x] **Beleuchtungseffekte:** Lichtpools, Vignette, Laternen
 - [x] **Szenen-Geometrie vereinheitlicht:** 4px-Rahmen als box-shadow, pixelgenaues Szenen-Setup
+- [x] **Mobile-Passgenauigkeit:** Die komplette 800×450-Szene wird per CSS-Transform
+      auf kleine Displays skaliert (`fitToViewport`, inkl. `visualViewport` und
+      Orientation-Change). Die interne Pixel-Geometrie bleibt unverändert, damit
+      Hotspots, Inventar und Dialog exakt sitzen. Auf kleinen Portrait-Geräten
+      erscheint ein dezenter Hinweis auf das Querformat.
 - [x] Inventarsystem (Hammer, Weihnachtskugel und Stock aufsammeln)
 - [x] **Drei Sammelobjekte:** Der Hammer kommt aus dem Zelt, die Kugel fällt beim
       Baumklick herunter und wird per Hotspot aufgehoben. Der erste Vogel trägt den
@@ -197,6 +202,6 @@ Project1/
 - Neue Biome (Fels, Wald) und mehr scenic variations
 - Mehr Inventargegenstände und Rätsel
 - Sprite-Dialog-System mit mehr Optionen
-- Sprachversionen (English/French), Mobile-Optimierung
+- Sprachversionen (English/French), erweiterte Touch-Steuerung
 
 **Docs:** [Zum Spiel](index.html)

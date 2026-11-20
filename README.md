@@ -13,6 +13,7 @@ Spielbar auf GitHub Pages:
 - Kein Framework, kein Build-Schritt, kein Server nötig
 - Punkt-und-Klick-Szenen, Inventar, Animationen und WebAudio-Sounds
 - Vollständig relative Pfade – ideal für GitHub Pages
+- Automatische Passgenau-Skalierung auf kleine Displays (16:9, Querformat empfohlen)
 
 ## Lokal starten
 

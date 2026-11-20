@@ -155,6 +155,13 @@ const GAME = {
     this.endScreen = document.getElementById('end-screen');
     this.restartBtn = document.getElementById('restart-btn');
 
+    this.fitToViewport();
+    window.addEventListener('resize', () => this.fitToViewport());
+    window.addEventListener('orientationchange', () => setTimeout(() => this.fitToViewport(), 150));
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => this.fitToViewport());
+    }
+
     this.updateInventory();
     this.renderScene();
     this.setupClickHandlers();
@@ -1688,6 +1695,20 @@ const GAME = {
       area.appendChild(sp);
       setTimeout(() => sp.remove(), 1500);
     }
+  },
+
+  /* Skaliert die feste 800x450-Szene passgenau in jedes Display.
+     Optional mit width/height aufrufbar – praktisch für Tests. */
+  fitToViewport(width, height) {
+    const game = document.getElementById('game');
+    if (!game) return;
+    const vw = width || (window.visualViewport ? window.visualViewport.width : window.innerWidth);
+    const vh = height || (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+    const pad = 12;
+    const raw = Math.min((vw - pad) / 800, (vh - pad) / 450, 1);
+    const scale = Math.max(0.2, raw);
+    game.style.transform = 'scale(' + scale + ')';
+    game.dataset.scale = scale.toFixed(3);
   },
 
   restart() {
