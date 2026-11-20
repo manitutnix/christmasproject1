@@ -4,6 +4,11 @@ Ein kleines, browserbasiertes Retro-Pixel-Adventure auf Deutsch: Charlotte samme
 **Hammer**, **Weihnachtskugel** und **Stock**, repariert den Rodel und fährt ein
 kurzes Rennen bis ins Ziel.
 
+## Live-Demo
+
+Spielbar auf GitHub Pages:
+**[https://manitutnix.github.io/christmasproject1/](https://manitutnix.github.io/christmasproject1/)**
+
 - Reine Web-Technik: HTML5, CSS3, Vanilla JavaScript
 - Kein Framework, kein Build-Schritt, kein Server nötig
 - Punkt-und-Klick-Szenen, Inventar, Animationen und WebAudio-Sounds
