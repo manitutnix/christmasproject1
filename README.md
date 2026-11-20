@@ -44,6 +44,18 @@ Danach `http://localhost:8000` aufrufen.
 - `docs/Gemini_Generated_a3.jpg` – lokale Stil-Referenz (nicht im Git-Repo)
 - `PROJEKT_PLAN.md` – ausführliche deutsche Projektdokumentation
 - `DEPLOYMENT.md` – Anleitung für GitHub Pages
+- `LICENSE` – MIT-Lizenz
+
+## KI-Hinweis
+
+Code und Pixel-Art dieses Projekts wurden mit KI-Unterstützung erstellt.
+Die Sprites wurden mit einem KI-gestützten Pixel-Art-Werkzeug angefertigt;
+die lokale Stilreferenz `docs/Gemini_Generated_a3.jpg` stammt aus einer
+Gemini-Bildgenerierung und ist bewusst nicht Teil des Repositories.
+
+## Lizenz
+
+Dieses Projekt steht unter der [MIT-Lizenz](LICENSE).
 
 ## Deployment
 

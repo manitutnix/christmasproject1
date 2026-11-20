@@ -103,6 +103,7 @@ Project1/
 │       └── obstacle_rock.png  # Stein (16×12)
 ├── README.md               # Kurzüberblick und lokaler Start
 ├── DEPLOYMENT.md           # GitHub-Pages-Anleitung
+├── LICENSE                 # MIT-Lizenz
 ├── .gitignore              # OS-/Editor-/Temp-Dateien ausschließen
 └── PROJEKT_PLAN.md         # Diese Datei
 ```
