@@ -151,6 +151,11 @@ Project1/
       fallen – erst danach ist er per Hotspot aufhebbar. Der erste Vogel erscheint
       erst 2 Sekunden nach der ersten Interaktion; die drei kleineren Tannen sind
       ebenfalls anklickbar, haben aber sonst keine Wirkung.
+ - [x] **Bugfix Vogel-Timer:** Ein Szenen-Re-Render (z. B. Kugel aufheben) löscht
+       den Vogel-Timer. Der Zeitpunkt des ersten Besuchs wird jetzt als `firstBirdAt`
+       gespeichert und mit der Restzeit neu geplant – der Vogel kommt auch dann
+       nach 2 Sekunden, wenn zuerst die Kugel vom Baum genommen wird. Das gilt
+       ebenfalls für einen zwischenzeitlichen Zeltbesuch.
 - [x] **Inventar verschönert:** pixeliger Werkzeuggürtel unten rechts, drei Slots,
       goldener Rahmen, Icons aus den Original-Sprites, Statuszeile und
       Pop-Animation beim Einsammeln. Dialogbox und Inventar sind unten bündig und

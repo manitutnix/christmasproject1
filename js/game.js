@@ -174,6 +174,7 @@ const GAME = {
   birdAnim: null,
   birdWillDrop: false,    // der erste Vogel bringt den Stock
   firstInteractionDone: false, // erster Klick in der Szene hat den Vogel scharf gemacht
+  firstBirdAt: 0,         // Zeitpunkt des ersten Vogelbesuchs (bleibt bei Re-Renders erhalten)
   firstBirdDone: false,   // der erste Vogelbesuch hat stattgefunden
   birdCarryStick: false,
   birdCarryEl: null,
@@ -327,6 +328,14 @@ const GAME = {
 
     // Vignette zuletzt (über den Sprites, unter Hotspots/Dialog)
     if (this.scene !== 'race') scene.appendChild(this.vignette());
+
+    // Ein Re-Render (z. B. Kugel aufheben) beendet stopBird() und löscht damit
+    // den Vogel-Timer. Der erste Vogel muss trotzdem zum ursprünglichen
+    // Zeitpunkt kommen – dafür die restliche Zeit hier neu einplanen.
+    if (this.scene === 'outdoor' && this.firstInteractionDone &&
+        !this.firstBirdDone && this.firstBirdAt && !this.birdTimer && !this.bird) {
+      this.armFirstBird();
+    }
   },
 
   /* ---------- Hintergründe (SVG, wie zuvor) ---------- */
@@ -1228,15 +1237,20 @@ const GAME = {
 
   /* ---------- Vogel ---------- */
   /* Der erste Besuch startet erst nach der ersten Interaktion – und dann
-     exakt 2 Sekunden später. Wird vorher die Szene gewechselt, löscht
-     renderScene() den Timer; beim Zurückkehren wird er hier neu gesetzt. */
+     exakt 2 Sekunden später. Wird vorher die Szene neu gerendert (Kugel oder
+     Stock aufheben) oder verlassen, bleibt der Zeitpunkt erhalten und der
+     Timer wird beim Zurückkehren mit der Restzeit neu gesetzt. */
   armFirstBird() {
     if (!this.firstInteractionDone || this.firstBirdDone) return;
     if (this.scene !== 'outdoor') return;
     if (this.birdTimer || this.bird) return;
-    // Beim ersten Besuch bringt der Vogel den Stock mit.
-    this.birdWillDrop = !this.stickDropped && !this.inventory.includes('stick');
-    this.birdTimer = setTimeout(() => this.birdLand(), 2000);
+    if (!this.firstBirdAt) {
+      // Beim ersten Besuch bringt der Vogel den Stock mit.
+      this.firstBirdAt = performance.now() + 2000;
+      this.birdWillDrop = !this.stickDropped && !this.inventory.includes('stick');
+    }
+    const delay = Math.max(0, this.firstBirdAt - performance.now());
+    this.birdTimer = setTimeout(() => this.birdLand(), delay);
   },
 
   stopBird() {
@@ -1261,6 +1275,7 @@ const GAME = {
     const scene = document.getElementById('scene');
     if (!scene) return;
     this.firstBirdDone = true;
+    this.firstBirdAt = 0;
     const willDrop = this.birdWillDrop;
     this.stopBird();
     this.birdState = 'flying-in';
@@ -2332,6 +2347,7 @@ const GAME = {
     this.stickDropped = false;
     this.birdWillDrop = false;
     this.firstInteractionDone = false;
+    this.firstBirdAt = 0;
     this.firstBirdDone = false;
     this.charlotteLine = 0;
     this.repairing = false;
