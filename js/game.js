@@ -65,6 +65,11 @@ const SFX = (() => {
     },
     /* stumble */
     stumble() { tone(48, 0.09, {type: 'sine', vol: 0.25}); },
+    /* bonus: klassischer Münz-Doppelpiep */
+    coin() {
+      tone(84, 0.05, {type: 'square', vol: 0.16});
+      tone(88, 0.13, {type: 'square', vol: 0.16, delay: 0.06});
+    },
     /* win */
     win() {
       tone(60, 0.1, {type: 'sine', vol: 0.3});
@@ -92,6 +97,9 @@ const ASSETS = {
   birdFly1: 'assets/game/bird_fly1.png',
   birdFly2: 'assets/game/bird_fly2.png',
   ornament: 'assets/game/ornament.png',
+  ornamentGreen: 'assets/game/ornament_green.png',
+  ornamentBlue: 'assets/game/ornament_blue.png',
+  ornamentPurple: 'assets/game/ornament_purple.png',
   stick: 'assets/game/stick.png',
   obstacleDrift: 'assets/game/obstacle_drift.png',
   obstacleRock: 'assets/game/obstacle_rock.png'
@@ -105,6 +113,15 @@ const INVENTORY_ITEMS = {
 };
 const REPAIR_ITEMS = ['hammer', 'ornament', 'stick'];
 const WELCOME_TEXT = 'Willkommen! 🎄 Hilf Charlotte, den Rodel zu reparieren.';
+
+// Vier Kugel-Varianten für das Bonus-Level – seltene Farben geben mehr Punkte.
+const BONUS_ORNAMENTS = [
+  { src: ASSETS.ornament,      points: 10, name: 'Rot' },
+  { src: ASSETS.ornamentGreen, points: 15, name: 'Grün' },
+  { src: ASSETS.ornamentBlue,  points: 20, name: 'Blau' },
+  { src: ASSETS.ornamentPurple,points: 25, name: 'Violett' }
+];
+const BONUS_HIGHSCORE_KEY = 'charlotte_bonus_highscore';
 
 const GAME = {
   scene: 'outdoor',
@@ -132,6 +149,23 @@ const GAME = {
   raceSpawnTimer: null,
   raceEnded: false,
 
+  // Bonus-Level: Kugelregen
+  bonusActive: false,
+  bonusEnded: false,
+  bonusScore: 0,
+  bonusHighScore: 0,
+  bonusCaught: 0,
+  bonusMissed: 0,
+  bonusDuration: 20000,
+  bonusStartAt: 0,
+  bonusLastTs: 0,
+  bonusLoop: null,
+  bonusItems: [],
+  bonusSpawnAcc: 0,
+  bonusPlayerX: 400,
+  bonusMoveDir: 0,
+  bonusPointerX: null,
+
   // Vogel-Zustand
   bird: null,
   birdState: 'away',      // away | flying-in | sitting | flying-out
@@ -152,6 +186,10 @@ const GAME = {
   restartBtn: null,
   resetBtn: null,
   fullscreenBtn: null,
+  bonusBtn: null,
+  bonusResult: null,
+  bonusReplayBtn: null,
+  bonusBackBtn: null,
 
   start() {
     this.dialog = document.getElementById('dialog-text');
@@ -161,6 +199,11 @@ const GAME = {
     this.restartBtn = document.getElementById('restart-btn');
     this.fullscreenBtn = document.getElementById('fullscreen-btn');
     this.resetBtn = document.getElementById('reset-btn');
+    this.bonusBtn = document.getElementById('bonus-btn');
+    this.bonusResult = document.getElementById('bonus-result');
+    this.bonusReplayBtn = document.getElementById('bonus-replay-btn');
+    this.bonusBackBtn = document.getElementById('bonus-back-btn');
+    this.bonusHighScore = this.loadBonusHighScore();
 
     this.fitToViewport();
     window.addEventListener('resize', () => this.fitToViewport());
@@ -175,6 +218,12 @@ const GAME = {
     this.restartBtn.addEventListener('click', () => this.restart());
     this.resetBtn.addEventListener('click', () => this.restart());
     this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+    this.bonusBtn.addEventListener('click', () => this.startBonus());
+    this.bonusReplayBtn.addEventListener('click', () => this.startBonus());
+    this.bonusBackBtn.addEventListener('click', () => {
+      this.hideBonusResult();
+      this.showEndScreen();
+    });
 
     const fsChange = () => this.onFullscreenChange();
     document.addEventListener('fullscreenchange', fsChange);
@@ -182,6 +231,28 @@ const GAME = {
     window.addEventListener('keydown', (e) => {
       const real = document.fullscreenElement || document.webkitFullscreenElement;
       if (e.key === 'Escape' && !real && this.isFullscreenActive()) this.toggleFullscreen();
+    });
+
+    // Bonus-Level: Charlotte mit Pfeiltasten oder A/D bewegen.
+    window.addEventListener('keydown', (e) => {
+      if (!this.bonusActive) return;
+      const k = (e.key || '').toLowerCase();
+      if (k === 'arrowleft' || k === 'a') {
+        this.bonusMoveDir = -1;
+        this.bonusPointerX = null;
+        e.preventDefault();
+      } else if (k === 'arrowright' || k === 'd') {
+        this.bonusMoveDir = 1;
+        this.bonusPointerX = null;
+        e.preventDefault();
+      }
+    });
+    window.addEventListener('keyup', (e) => {
+      if (!this.bonusActive) return;
+      const k = (e.key || '').toLowerCase();
+      if (k === 'arrowleft' || k === 'a' || k === 'arrowright' || k === 'd') {
+        this.bonusMoveDir = 0;
+      }
     });
 
     // Tastatur für das Rodelrennen (Leertaste / Pfeil hoch)
@@ -220,20 +291,22 @@ const GAME = {
     this.stopBird();          // laufende Vogel-Timer/-Animationen beenden
     scene.innerHTML = '';
     scene.style.background = '';
-    // Klasse 'race' für CSS-Hooks
+    // Klassen für CSS-Hooks
     scene.classList.toggle('race', this.scene === 'race');
+    scene.classList.toggle('bonus', this.scene === 'bonus');
 
     // Hintergrund (bleibt als CSS/SVG – Landschaft)
     const bg = document.createElement('div');
     bg.className = 'scene-bg';
-    bg.innerHTML = this.scene === 'outdoor' ? this.bgOutdoor()
-                  : this.scene === 'indoor' ? this.bgIndoor()
-                  : this.bgRace();
+    bg.innerHTML = this.scene === 'indoor' ? this.bgIndoor()
+                  : this.scene === 'race' ? this.bgRace()
+                  : this.bgOutdoor();
     scene.appendChild(bg);
 
     if (this.scene === 'outdoor') this.renderOutdoor(scene);
     else if (this.scene === 'indoor') this.renderIndoor(scene);
     else if (this.scene === 'race') this.renderRace(scene);
+    else if (this.scene === 'bonus') this.renderBonus(scene);
 
     // Vignette zuletzt (über den Sprites, unter Hotspots/Dialog)
     if (this.scene !== 'race') scene.appendChild(this.vignette());
@@ -828,7 +901,26 @@ const GAME = {
   },
 
   setupClickHandlers() {
-    document.getElementById('scene').addEventListener('click', (e) => {
+    const scene = document.getElementById('scene');
+    // Bonus-Level: Zeiger/Touch folgt der Korbfigur; Tasten werden oben
+    // im keydown/keyup-Handler behandelt.
+    scene.addEventListener('pointerdown', (e) => {
+      if (!this.bonusActive) return;
+      this.bonusPointerX = this.bonusSceneX(e.clientX);
+    });
+    scene.addEventListener('pointermove', (e) => {
+      if (!this.bonusActive) return;
+      this.bonusPointerX = this.bonusSceneX(e.clientX);
+    });
+    scene.addEventListener('pointerleave', () => {
+      if (this.bonusActive) this.bonusPointerX = null;
+    });
+
+    scene.addEventListener('click', (e) => {
+      if (this.bonusActive) {
+        this.bonusPointerX = this.bonusSceneX(e.clientX);
+        return;
+      }
       if (this.raceActive) {
         this.raceJump();
         return;
@@ -840,6 +932,16 @@ const GAME = {
       if (!hotspot) return;
       this.handleAction(hotspot.dataset.action);
     });
+  },
+
+  /* Viewport-Pixel in die festen 800x450-Szenenkoordinaten umrechnen. */
+  bonusSceneX(clientX) {
+    const scene = document.getElementById('scene');
+    if (!scene) return 400;
+    const r = scene.getBoundingClientRect();
+    const scale = r.width / (scene.offsetWidth || 800) || 1;
+    const x = (clientX - r.left) / scale;
+    return Math.max(52, Math.min(748, x));
   },
 
   handleFirstInteraction() {
@@ -1726,6 +1828,237 @@ const GAME = {
     document.querySelectorAll('.snow-drift').forEach(el => el.remove());
   },
 
+  /* ==================== BONUS-LEVEL: KUGELREGEN ==================== */
+  /* Vier Kugelfarben fallen von oben. Charlotte läuft mit Pfeiltasten/A-D
+     oder folgt dem Finger; der Highscore bleibt im localStorage gespeichert. */
+
+  loadBonusHighScore() {
+    try {
+      const value = parseInt(localStorage.getItem(BONUS_HIGHSCORE_KEY) || '0', 10);
+      return Number.isFinite(value) && value > 0 ? value : 0;
+    } catch (e) { return 0; }
+  },
+
+  saveBonusHighScore(value) {
+    try { localStorage.setItem(BONUS_HIGHSCORE_KEY, String(value)); } catch (e) { /* ignore */ }
+  },
+
+  renderBonus(container) {
+    const player = document.createElement('img');
+    player.id = 'bonus-player';
+    player.src = ASSETS.charlotte;
+    player.alt = '';
+    player.className = 'pixel-sprite bonus-player';
+    Object.assign(player.style, {
+      width: '80px', bottom: '145px', left: (this.bonusPlayerX - 40) + 'px', zIndex: '12'
+    });
+    container.appendChild(player);
+
+    const basket = document.createElement('div');
+    basket.id = 'bonus-basket';
+    basket.className = 'bonus-basket';
+    basket.style.left = (this.bonusPlayerX - 48) + 'px';
+    basket.style.bottom = '145px';
+    container.appendChild(basket);
+
+    const hud = document.createElement('div');
+    hud.id = 'bonus-hud';
+    hud.className = 'bonus-hud';
+    container.appendChild(hud);
+
+    const legend = document.createElement('div');
+    legend.id = 'bonus-legend';
+    legend.className = 'bonus-legend';
+    legend.innerHTML = BONUS_ORNAMENTS.map(o =>
+      '<span><img src="' + o.src + '" alt="">+' + o.points + '</span>'
+    ).join('');
+    container.appendChild(legend);
+
+    const hint = document.createElement('div');
+    hint.id = 'bonus-hint';
+    hint.className = 'bonus-hint';
+    hint.textContent = 'Kugeln fangen! Tippen & ziehen oder ← →';
+    container.appendChild(hint);
+    setTimeout(() => { if (hint.parentNode) hint.remove(); }, 2600);
+
+    this.bonusUpdateHud();
+  },
+
+  startBonus() {
+    this.stopBonus();
+    this.hideEndScreen();
+    this.hideBonusResult();
+    this.scene = 'bonus';
+    this.bonusActive = true;
+    this.bonusEnded = false;
+    this.bonusScore = 0;
+    this.bonusCaught = 0;
+    this.bonusMissed = 0;
+    this.bonusItems = [];
+    this.bonusSpawnAcc = 0;
+    this.bonusPlayerX = 400;
+    this.bonusMoveDir = 0;
+    this.bonusPointerX = null;
+    this.bonusStartAt = performance.now();
+    this.bonusLastTs = 0;
+    this.renderScene();
+    this.say('Fange die fallenden Weihnachtskugeln! 🎁');
+    SFX.start();
+    this.bonusLoop = requestAnimationFrame(t => this.bonusTick(t));
+  },
+
+  bonusUpdateHud() {
+    const hud = document.getElementById('bonus-hud');
+    if (!hud) return;
+    const left = Math.max(0, this.bonusDuration - (performance.now() - this.bonusStartAt));
+    hud.innerHTML = '<span>Punkte: <b>' + this.bonusScore + '</b></span>' +
+      '<span>Zeit: <b>' + Math.ceil(left / 1000) + 's</b></span>' +
+      '<span>Rekord: <b>' + this.bonusHighScore + '</b></span>';
+  },
+
+  bonusTick(ts) {
+    if (!this.bonusActive) return;
+    if (!this.bonusLastTs) this.bonusLastTs = ts;
+    const dt = Math.min(0.05, (ts - this.bonusLastTs) / 1000);
+    this.bonusLastTs = ts;
+
+    const elapsed = performance.now() - this.bonusStartAt;
+    const progress = Math.min(1, elapsed / this.bonusDuration);
+    if (elapsed >= this.bonusDuration) {
+      this.endBonus();
+      return;
+    }
+
+    // Spieler bewegen: Tasten haben Vorrang, sonst folgt er dem Zeiger.
+    let nextX = this.bonusPlayerX;
+    if (this.bonusMoveDir) {
+      nextX += this.bonusMoveDir * 430 * dt;
+    } else if (this.bonusPointerX != null) {
+      const diff = this.bonusPointerX - nextX;
+      nextX += Math.sign(diff) * Math.min(Math.abs(diff), 900 * dt);
+    }
+    this.bonusPlayerX = Math.max(52, Math.min(748, nextX));
+    const player = document.getElementById('bonus-player');
+    const basket = document.getElementById('bonus-basket');
+    if (player) player.style.left = (this.bonusPlayerX - 40) + 'px';
+    if (basket) basket.style.left = (this.bonusPlayerX - 48) + 'px';
+
+    // Kugeln nachziehen – das Tempo nimmt leicht zu.
+    this.bonusSpawnAcc += dt;
+    const interval = 0.72 - 0.36 * progress;
+    if (this.bonusSpawnAcc >= interval) {
+      this.bonusSpawnAcc -= interval;
+      this.spawnBonusOrnament(progress);
+    }
+
+    for (let i = this.bonusItems.length - 1; i >= 0; i--) {
+      const item = this.bonusItems[i];
+      item.y += item.vy * dt;
+      item.wobble += item.wobbleSpeed * dt;
+      item.x += Math.sin(item.wobble) * 10 * dt;
+      item.angle += item.spin * dt;
+      item.el.style.left = (item.x - 13) + 'px';
+      item.el.style.top = (item.y - 16) + 'px';
+      item.el.style.transform = 'rotate(' + item.angle.toFixed(1) + 'deg)';
+
+      if (Math.abs(item.x - this.bonusPlayerX) < 50 && item.y >= 255 && item.y <= 305) {
+        this.collectBonusOrnament(i);
+      } else if (item.y > 330) {
+        item.el.remove();
+        this.bonusItems.splice(i, 1);
+        this.bonusMissed++;
+      }
+    }
+
+    this.bonusUpdateHud();
+    this.bonusLoop = requestAnimationFrame(t => this.bonusTick(t));
+  },
+
+  spawnBonusOrnament(progress) {
+    const scene = document.getElementById('scene');
+    if (!scene) return;
+    const variant = BONUS_ORNAMENTS[Math.floor(Math.random() * BONUS_ORNAMENTS.length)];
+    const el = document.createElement('img');
+    el.src = variant.src;
+    el.alt = '';
+    el.className = 'pixel-sprite bonus-ornament';
+    el.style.width = '26px';
+    const x = 40 + Math.random() * 720;
+    const y = -30;
+    el.style.left = (x - 13) + 'px';
+    el.style.top = (y - 16) + 'px';
+    el.style.zIndex = '14';
+    scene.appendChild(el);
+    this.bonusItems.push({
+      el: el, x: x, y: y,
+      vy: 150 + progress * 140 + Math.random() * 70,
+      angle: Math.random() * 360,
+      spin: (Math.random() - 0.5) * 220,
+      wobble: Math.random() * 6,
+      wobbleSpeed: 2 + Math.random() * 2,
+      points: variant.points
+    });
+  },
+
+  collectBonusOrnament(index) {
+    const item = this.bonusItems[index];
+    if (!item) return;
+    this.bonusScore += item.points;
+    this.bonusCaught++;
+    SFX.coin();
+    this.bonusPop(item.x, item.y, '+' + item.points);
+    item.el.remove();
+    this.bonusItems.splice(index, 1);
+  },
+
+  bonusPop(x, y, text) {
+    const scene = document.getElementById('scene');
+    if (!scene) return;
+    const pop = document.createElement('div');
+    pop.className = 'bonus-pop';
+    pop.textContent = text;
+    pop.style.left = x + 'px';
+    pop.style.top = y + 'px';
+    scene.appendChild(pop);
+    setTimeout(() => { if (pop.parentNode) pop.remove(); }, 750);
+  },
+
+  endBonus() {
+    if (!this.bonusActive) return;
+    this.stopBonus();
+
+    const record = this.bonusScore > this.bonusHighScore;
+    if (record) {
+      this.bonusHighScore = this.bonusScore;
+      this.saveBonusHighScore(this.bonusScore);
+      SFX.win();
+    } else {
+      SFX.coin();
+    }
+
+    const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    set('bonus-result-title', record ? '🎉 Neuer Rekord!' : '🎁 Bonus-Level beendet!');
+    set('bonus-result-score', 'Punkte: ' + this.bonusScore);
+    set('bonus-result-high', 'Highscore: ' + this.bonusHighScore);
+    set('bonus-result-extra', 'Gefangen: ' + this.bonusCaught + ' Kugeln · Verpasst: ' + this.bonusMissed);
+    if (this.bonusResult) this.bonusResult.style.display = 'flex';
+    this.say('Bonus-Level geschafft! Dein Highscore: ' + this.bonusHighScore + ' Punkte.');
+  },
+
+  stopBonus() {
+    this.bonusActive = false;
+    this.bonusEnded = true;
+    if (this.bonusLoop) { cancelAnimationFrame(this.bonusLoop); this.bonusLoop = null; }
+    this.bonusItems.forEach(item => item.el.remove());
+    this.bonusItems = [];
+    this.bonusMoveDir = 0;
+    this.bonusPointerX = null;
+  },
+
+  hideBonusResult() {
+    if (this.bonusResult) this.bonusResult.style.display = 'none';
+  },
+
   spawnEndDrifts() {
     const scene = document.getElementById('scene');
     if (!scene) return;
@@ -1918,8 +2251,10 @@ const GAME = {
     this.raceEnded = false;
     this.raceClear();
     this.stopBird();
+    this.stopBonus();
     this.updateInventory();
     this.hideEndScreen();
+    this.hideBonusResult();
     this.renderScene();
     this.say(WELCOME_TEXT);
   },

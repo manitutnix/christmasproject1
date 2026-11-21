@@ -785,6 +785,12 @@ body {
 .end-stats span { margin: 0 8px; }
 .end-stats span#end-stat-dist { font-weight: bold; color: #2e8b57; }
 
+.end-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: calc(10px * var(--end-strong));
+}
 .end-content button {
   background: #ffb6c1;
   border: 2px solid #fff;
@@ -796,6 +802,12 @@ body {
   border-radius: 6px;
 }
 .end-content button:hover { background: #ffc0cb; }
+#bonus-btn {
+  background: linear-gradient(#2e8b57, #1d5f3b);
+  color: #fff4c1;
+  border-color: #ffd700;
+}
+#bonus-btn:hover { background: linear-gradient(#38a86a, #247248); }
 
 #end-title {
   text-shadow: 3px 3px 0 #000, 0 0 14px rgba(255,255,255,0.5);
@@ -827,6 +839,163 @@ body {
   12%  { opacity: 1; transform: translate(var(--dx, -20px), var(--dy, -20px)) scale(1); }
   100% { opacity: 0; transform: translate(var(--dx, -20px), var(--dy, -20px)) scale(0.2); }
 }
+
+/* ------------------- Bonus-Level: Kugelregen ------------------- */
+/* Leicht abgedunkelter Winterhimmel, damit die Kugeln besser leuchten. */
+.scene.bonus .scene-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(12, 26, 56, 0.42), rgba(12, 26, 56, 0.18));
+  pointer-events: none;
+}
+
+.bonus-player { pointer-events: none; }
+.bonus-basket {
+  position: absolute;
+  width: 96px;
+  height: 24px;
+  background: repeating-linear-gradient(90deg, #b8860b 0 8px, #daa520 8px 16px);
+  border: 3px solid #ffd700;
+  box-shadow: 0 3px 0 #6b3f00, inset 0 -5px 0 rgba(0,0,0,0.25);
+  z-index: 13;
+  pointer-events: none;
+}
+.bonus-basket::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: -5px;
+  height: 6px;
+  background: #8b4513;
+  border: 2px solid #ffd700;
+}
+
+.bonus-hud {
+  position: absolute;
+  top: calc(70px * var(--ui-boost));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: calc(16px * var(--ui-boost));
+  padding: calc(6px * var(--ui-boost)) calc(14px * var(--ui-boost));
+  background: rgba(0,0,0,0.72);
+  border: 2px solid #ffd700;
+  color: #fff4c1;
+  font-size: calc(16px * var(--ui-boost));
+  white-space: nowrap;
+  z-index: 30;
+  pointer-events: none;
+  text-shadow: 2px 2px 0 #000;
+}
+.bonus-hud b { color: #fff; }
+
+.bonus-legend {
+  position: absolute;
+  top: calc(106px * var(--ui-boost));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: calc(10px * var(--ui-boost));
+  padding: calc(3px * var(--ui-boost)) calc(8px * var(--ui-boost));
+  background: rgba(0,0,0,0.45);
+  font-size: calc(12px * var(--ui-boost));
+  color: #fff;
+  z-index: 30;
+  pointer-events: none;
+}
+.bonus-legend span { display: inline-flex; align-items: center; gap: 3px; }
+.bonus-legend img { width: 14px; height: auto; image-rendering: pixelated; }
+
+.bonus-hint {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: calc(8px * var(--ui-boost)) calc(14px * var(--ui-boost));
+  background: rgba(0,0,0,0.75);
+  border: 2px solid #fff;
+  color: #fff;
+  font-size: calc(16px * var(--ui-boost-strong));
+  white-space: nowrap;
+  z-index: 30;
+  pointer-events: none;
+  animation: bubblePop 2.6s ease-out forwards;
+}
+
+.bonus-ornament {
+  image-rendering: pixelated;
+  filter: drop-shadow(2px 3px 0 rgba(0,0,0,0.35));
+  pointer-events: none;
+}
+.bonus-pop {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  color: #fff4a3;
+  font-size: calc(18px * var(--ui-boost-strong));
+  font-weight: bold;
+  text-shadow: 2px 2px 0 #000;
+  z-index: 31;
+  pointer-events: none;
+  animation: bonusPopFloat 0.75s ease-out forwards;
+}
+@keyframes bonusPopFloat {
+  0%   { opacity: 0; transform: translate(-50%, -30%) scale(0.6); }
+  20%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -160%) scale(1); }
+}
+
+/* Ergebnis des Bonus-Levels */
+.bonus-result {
+  position: absolute;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0,0,0,0.78);
+  z-index: 205; /* über dem Endbildschirm, unter dem Titelbanner */
+}
+.bonus-result-box {
+  background: #fff;
+  color: #222;
+  padding: calc(22px * var(--end-boost)) calc(30px * var(--end-boost));
+  border: 6px solid #2e8b57;
+  border-radius: 12px;
+  text-align: center;
+  font-family: 'Courier New', Courier, monospace;
+  width: min(90%, calc(460px * var(--end-boost)));
+}
+.bonus-result-box h2 {
+  margin: 0 0 calc(12px * var(--end-boost));
+  color: #1d5f3b;
+  font-size: calc(26px * var(--end-boost));
+}
+.bonus-result-box p {
+  margin: calc(6px * var(--end-boost)) 0;
+  font-size: calc(18px * var(--end-boost));
+}
+#bonus-result-score { font-weight: bold; color: #b22222; font-size: calc(24px * var(--end-boost)); }
+#bonus-result-high { font-weight: bold; color: #2e8b57; }
+#bonus-result-extra { font-size: calc(14px * var(--end-boost)); color: #555; }
+.bonus-result-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: calc(10px * var(--end-strong));
+  margin-top: calc(16px * var(--end-boost));
+}
+.bonus-result-actions button {
+  background: #ffb6c1;
+  border: 2px solid #fff;
+  color: #222;
+  padding: calc(8px * var(--end-strong)) calc(16px * var(--end-strong));
+  font-family: inherit;
+  font-size: calc(16px * var(--end-strong));
+  border-radius: 6px;
+  cursor: pointer;
+}
+.bonus-result-actions button:hover { background: #ffc0cb; }
 
 /* Wichtig: #game bleibt immer 800x450. Die Anpassung erfolgt ausschließlich
    über transform: scale() in fitToViewport – sonst verrutschen Hotspots. */

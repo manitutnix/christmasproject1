@@ -16,6 +16,7 @@ Spielbar auf GitHub Pages:
 - Automatische Passgenau-Skalierung auf kleine Displays (16:9, Querformat empfohlen)
 - Vergrößerte UI-Schrift und Touch-Flächen auf kleinen Geräten; kein Leertasten-Hinweis im Spiel
 - Dauerhaft sichtbares Titelbanner „Charlottes Weihnachtszauber“ sowie Vollbild- und Reset-Schalter oben rechts
+- Bonus-Level ab dem Glückwunschbildschirm: 20 Sekunden Weihnachtskugeln fangen, vier Farben mit unterschiedlichen Punkten und dauerhaft gespeicherter Highscore
 
 ## Lokal starten
 
@@ -35,6 +36,7 @@ Danach `http://localhost:8000` aufrufen.
 3. Der erste Vogel lässt den Stock ganz links zwischen den Tannen fallen.
 4. Mit allen drei Teilen auf den Rodel klicken und das Rennen gewinnen.
 5. Charlotte gibt auf wiederholte Klicks immer genauere Tipps.
+6. Nach dem Sieg im Glückwunschbildschirm auf **🎁 Bonus-Level** klicken: Mit Zeiger/Touch oder `←`/`→` bzw. `A`/`D` Kugeln fangen. Rote Kugeln geben 10, grüne 15, blaue 20 und violette 25 Punkte. Der Highscore bleibt erhalten.
 
 ## Struktur
 

@@ -191,7 +191,12 @@ Project1/
 - [x] **Endbildschirm:** Titel „RASERIG AUF DIE ZIELE — WEIHNACHTEN!" (Gewinn),
       Statistik (Geschwindigkeit), Funken über dem Titel, Schneewehen und ein
       gut sichtbarer Neustart-Button („▶  Neu starten").
-- [x] **Sound:** SFX-System (WebAudio) — Start, Whoosh, Hindernis, Sprung, Stolpern, Sieg.
+- [x] **Bonus-Level:** Vom Glückwunschbildschirm aus wählbar. 20 Sekunden lang
+      fallen Weihnachtskugeln in vier Varianten (Rot 10, Grün 15, Blau 20,
+      Violett 25 Punkte). Charlotte läuft per Zeiger/Touch oder `←`/`→`, `A`/`D`.
+      Ergebnis-Overlay zeigt Punkte, gefangene/verpasste Kugeln und den Highscore,
+      der per `localStorage` dauerhaft gespeichert wird.
+- [x] **Sound:** SFX-System (WebAudio) — Start, Whoosh, Hindernis, Sprung, Stolpern, Sieg, Münz-Piep im Bonus-Level.
 - [x] **Retro-Look:** Rausch-Overlay `retro-noise.svg` auf `#game`.
 - [x] **Endbildschirm v1.0:** „Frohe Weihnachten! 🎄" + Neu-Start-Button
 
