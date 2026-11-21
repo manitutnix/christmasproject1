@@ -22,6 +22,10 @@ create index if not exists bonus_highscores_score_idx
 
 alter table public.bonus_highscores enable row level security;
 
+-- Bei erneutem Ausführen zuerst vorhandene Policies entfernen:
+drop policy if exists "Bonus: Bestliste lesen" on public.bonus_highscores;
+drop policy if exists "Bonus: Eintrag hinzufügen" on public.bonus_highscores;
+
 -- Jeder darf die Bestliste lesen …
 create policy "Bonus: Bestliste lesen"
   on public.bonus_highscores for select
@@ -33,12 +37,10 @@ create policy "Bonus: Eintrag hinzufügen"
   to anon with check (true);
 ```
 
-Falls die Policies schon existieren, kann man sie vorher mit `drop policy
-if exists "…" on public.bonus_highscores;` entfernen.
-
-> **Wichtig:** Der `service_role`-Key darf niemals in den Browser oder in ein
-> GitHub-Repository. Der `anon`/`public`-Key ist genau für diesen Zweck da;
-> der Schutz entsteht durch die RLS-Policies.
+> **Wichtig:** Der `secret`-Key (`sb_secret_…`, früher `service_role`) darf
+> niemals in den Browser, in ein GitHub-Repository oder in einen Chat. Der
+> `publishable`-Key (`sb_publishable_…`, früher `anon`) ist genau für diesen
+> Zweck da; der Schutz entsteht durch die RLS-Policies.
 
 ## 2. Zugangsdaten eintragen
 
@@ -48,14 +50,16 @@ Datei `js/supabase-config.js` öffnen:
 window.SUPABASE_CONFIG = {
   enabled: true,
   url: 'https://DEIN_PROJEKT.supabase.co',
-  anonKey: 'DEIN_ANON_KEY',
+  anonKey: 'DEIN_PUBLISHABLE_KEY',
   table: 'bonus_highscores',
   limit: 5
 };
 ```
 
-- **Project URL** und **anon key** stehen in Supabase unter
-  *Project Settings → API*.
+- **Project URL** und **publishable key** stehen in Supabase unter
+  *Project Settings → API Keys*. Der Name `anonKey` in der Config ist nur
+  historisch – eingetragen wird der publishable key (`sb_publishable_…`).
+  Bei älteren Projekten funktioniert auch der legacy anon-Key (`eyJ…`).
 - `enabled` auf `true` setzen.
 - `limit` bestimmt, wie viele Plätze die kleine Bestliste zeigt.
 
@@ -81,3 +85,15 @@ Weiterleitungen nötig.
 
 Falls GitHub Pages gerade noch die alte Version ausliefert: kurz warten oder
 im Browser hard-reload (`Strg/Cmd + F5`).
+
+## 5. Fehlersuche
+
+- **`404 PGRST205 – Could not find the table …`**: Das SQL aus Schritt 1 wurde
+  noch nicht ausgeführt, oder die Tabelle heißt anders. Der Publishable-Key
+  ist in diesem Fall bereits korrekt – nur die Tabelle fehlt.
+- **`401 Unauthorized`**: Falscher Key. Der Browser braucht den publishable
+  key (`sb_publishable_…`), nicht den secret key (`sb_secret_…`).
+- **`403 / permission denied`**: RLS ist aktiv, aber die Policies aus Schritt 1
+  fehlen, oder dem `anon`-Role fehlt das `SELECT`/`INSERT`-Grant.
+- Badge **„Offline“**: Netzwerk/CORS problematisch oder Tabelle nicht da.
+  Einträge werden dann lokal gespeichert und sind nicht verloren.

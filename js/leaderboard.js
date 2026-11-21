@@ -63,11 +63,13 @@
 
   function headers(write) {
     const c = config();
-    const h = {
-      apikey: String(c.anonKey),
-      Authorization: 'Bearer ' + String(c.anonKey),
-      Accept: 'application/json'
-    };
+    const key = String(c.anonKey || '');
+    const h = { apikey: key, Accept: 'application/json' };
+    // Neue Supabase-Keys (sb_publishable_...) gehören nur in den apikey-Header.
+    // Legacy-anon-Keys sind JWTs und werden zusätzlich als Bearer akzeptiert.
+    if (!key.startsWith('sb_')) {
+      h.Authorization = 'Bearer ' + key;
+    }
     if (write) {
       h['Content-Type'] = 'application/json';
       h['Prefer'] = 'return=minimal';
