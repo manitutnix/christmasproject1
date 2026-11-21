@@ -17,7 +17,7 @@ Spielbar auf GitHub Pages:
 - Vergrößerte UI-Schrift und Touch-Flächen auf kleinen Geräten; kein Leertasten-Hinweis im Spiel
 - Dauerhaft sichtbares Titelbanner „Charlottes Weihnachtszauber“ sowie Vollbild- und Reset-Schalter oben rechts
 - Bonus-Level ab dem Glückwunschbildschirm: 30 Sekunden Weihnachtskugeln fangen, vier Farben (unterschiedliche Punkte) und vier deutlich verschiedene Größen (14/22/34/50 px); Punkte/Zeit/Rekord als schmale Leiste direkt am oberen Rand, dauerhaft gespeicherter Highscore
-- Kleine Online-Bestliste für das Bonus-Level über Supabase (mit lokalem Fallback) – Einrichtung siehe [SUPABASE.md](SUPABASE.md)
+- Kleine Online-Bestliste für das Bonus-Level über Supabase (mit lokalem Fallback und optionalem SQL-Spam-Schutz) – Einrichtung siehe [SUPABASE.md](SUPABASE.md)
 
 ## Lokal starten
 

@@ -103,3 +103,87 @@ im Browser hard-reload (`Strg/Cmd + F5`).
   fehlen.
 - Badge **„Offline“**: Netzwerk/CORS problematisch oder Tabelle nicht da.
   Einträge werden dann lokal gespeichert und sind nicht verloren.
+- **`400 / neue Row verletzt eine CHECK-Bedingung`**: Name oder Punktzahl
+  passen nicht mehr zu den verschärften Regeln aus Schritt 6.
+
+## 6. Spam-Schutz (SQLOnly, empfohlen)
+
+Der Publishable-Key ist öffentlich. Alles, was im Browser geprüft wird, kann
+man umgehen. Die folgenden Maßnahmen liegen **komplett in der Datenbank**:
+
+- Name nur mit Buchstaben (inkl. Umlaute), Zahlen, Leerzeichen, `-` und `_`
+- Punktzahl auf einen plausiblen Bereich begrenzt
+- Der Browser darf nur `name` und `score` schreiben – `created_at` und `id`
+  vergibt die Datenbank
+- RLS prüft zusätzlich Namen, Punkte und Zeitstempel
+- Ein Trigger begrenzt die Anzahl Einträge pro Zeitfenster
+
+Im **SQL Editor** ausführen (mehrfach ausführbar):
+
+```sql
+-- 1) Saubere Namen
+alter table public.bonus_highscores
+  drop constraint if exists bonus_highscores_name_format;
+alter table public.bonus_highscores
+  add constraint bonus_highscores_name_format
+  check (name ~ '^[[:alnum:]äöüÄÖÜß _-]+$');
+
+-- 2) Plausible Punktzahl (30 s Spielzeit, maximal 2500 Punkte)
+alter table public.bonus_highscores
+  drop constraint if exists bonus_highscores_score_max;
+alter table public.bonus_highscores
+  add constraint bonus_highscores_score_max
+  check (score between 0 and 2500);
+
+-- 3) Nur name und score dürfen vom Browser geschrieben werden
+revoke insert on public.bonus_highscores from anon;
+grant insert (name, score) on public.bonus_highscores to anon;
+
+-- 4) Insert-Policy verschärfen
+drop policy if exists "Bonus: Eintrag hinzufügen" on public.bonus_highscores;
+create policy "Bonus: Eintrag hinzufügen"
+  on public.bonus_highscores for insert
+  to anon
+  with check (
+    char_length(name) between 1 and 12
+    and name ~ '^[[:alnum:]äöüÄÖÜß _-]+$'
+    and score between 0 and 2500
+    and created_at between now() - interval '5 minutes'
+                       and now() + interval '1 minute'
+  );
+
+-- 5) Einfaches Rate-Limit in der Datenbank
+create or replace function public.bonus_highscores_rate_limit()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if (select count(*) from public.bonus_highscores
+      where created_at > now() - interval '1 minute') >= 60 then
+    raise exception 'Zu viele Einträge – bitte später erneut versuchen';
+  end if;
+
+  if (select count(*) from public.bonus_highscores
+      where name = new.name and created_at > now() - interval '1 minute') >= 3 then
+    raise exception 'Dieser Name wurde zu oft gespeichert';
+  end if;
+
+  return new;
+end;
+$$;
+
+drop trigger if exists bonus_highscores_rate_limit on public.bonus_highscores;
+create trigger bonus_highscores_rate_limit
+  before insert on public.bonus_highscores
+  for each row execute function public.bonus_highscores_rate_limit();
+```
+
+> **Grenze:** Das stoppt Gelegenheitsspam und einfache Skripte. Wer entschlossen
+> ist, kann weiterhin mit dem öffentlichen Key direkt POSTs schicken und dabei
+> Namen variieren. Ein echter Schutz wäre eine Edge Function mit Rate-Limit pro
+> IP plus CAPTCHA – dann müsste der Secret-Key serverseitig liegen.
+
+Nach dem Ausführen hier Bescheid geben – dann teste ich, ob das Speichern im
+Spiel weiterhin funktioniert und ein Treffer eine saubere Fehlermeldung ergibt.
