@@ -17,6 +17,7 @@ Spielbar auf GitHub Pages:
 - Vergrößerte UI-Schrift und Touch-Flächen auf kleinen Geräten; kein Leertasten-Hinweis im Spiel
 - Dauerhaft sichtbares Titelbanner „Charlottes Weihnachtszauber“ sowie Vollbild- und Reset-Schalter oben rechts
 - Bonus-Level ab dem Glückwunschbildschirm: 20 Sekunden Weihnachtskugeln fangen, vier Farben mit unterschiedlichen Punkten und dauerhaft gespeicherter Highscore
+- Kleine Online-Bestliste für das Bonus-Level über Supabase (mit lokalem Fallback) – Einrichtung siehe [SUPABASE.md](SUPABASE.md)
 
 ## Lokal starten
 
@@ -43,12 +44,14 @@ Danach `http://localhost:8000` aufrufen.
 - `index.html` – Spielgerüst, Dialog, Inventar, Endbildschirm
 - `css/style.css` – Retro-Layout und Animationen
 - `js/game.js` – Spiellogik, Szenen und Asset-Pfade
+- `js/leaderboard.js`, `js/supabase-config.js` – Bonus-Bestliste
 - `assets/game/` – Laufzeit-Sprites
 - `assets/source/` – 1x-Master-Canvas für spätere Sprite-Arbeit
 - `assets/retro-noise.svg` – Retro-Overlay
 - `docs/Gemini_Generated_a3.jpg` – lokale Stil-Referenz (nicht im Git-Repo)
 - `PROJEKT_PLAN.md` – ausführliche deutsche Projektdokumentation
 - `DEPLOYMENT.md` – Anleitung für GitHub Pages
+- `SUPABASE.md` – Einrichtung der Online-Bestliste
 - `LICENSE` – MIT-Lizenz
 
 ## KI-Hinweis

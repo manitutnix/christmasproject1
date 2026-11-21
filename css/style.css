@@ -959,39 +959,124 @@ body {
 .bonus-result-box {
   background: #fff;
   color: #222;
-  padding: calc(22px * var(--end-boost)) calc(30px * var(--end-boost));
+  padding: calc(16px * var(--end-boost)) calc(22px * var(--end-boost));
   border: 6px solid #2e8b57;
   border-radius: 12px;
   text-align: center;
   font-family: 'Courier New', Courier, monospace;
-  width: min(90%, calc(460px * var(--end-boost)));
+  width: min(94%, calc(560px * var(--end-boost)));
 }
+.bonus-result-body {
+  display: flex;
+  align-items: stretch;
+  gap: calc(16px * var(--end-boost));
+  text-align: left;
+}
+.bonus-result-main { flex: 1 1 52%; min-width: 0; }
 .bonus-result-box h2 {
-  margin: 0 0 calc(12px * var(--end-boost));
+  margin: 0 0 calc(8px * var(--end-boost));
   color: #1d5f3b;
-  font-size: calc(26px * var(--end-boost));
+  font-size: calc(21px * var(--end-boost));
+  line-height: 1.2;
 }
 .bonus-result-box p {
-  margin: calc(6px * var(--end-boost)) 0;
-  font-size: calc(18px * var(--end-boost));
+  margin: calc(4px * var(--end-boost)) 0;
+  font-size: calc(15px * var(--end-boost));
 }
-#bonus-result-score { font-weight: bold; color: #b22222; font-size: calc(24px * var(--end-boost)); }
+#bonus-result-score { font-weight: bold; color: #b22222; font-size: calc(20px * var(--end-boost)); }
 #bonus-result-high { font-weight: bold; color: #2e8b57; }
-#bonus-result-extra { font-size: calc(14px * var(--end-boost)); color: #555; }
+#bonus-result-extra { font-size: calc(12px * var(--end-boost)); color: #555; }
+
+.bonus-save-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(6px * var(--end-boost));
+  margin-top: calc(10px * var(--end-boost));
+  font-size: calc(13px * var(--end-boost));
+}
+.bonus-save-row input {
+  width: calc(96px * var(--end-boost));
+  min-width: 0;
+  padding: calc(4px * var(--end-boost));
+  border: 2px solid #8b4513;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: calc(13px * var(--end-boost));
+  text-align: center;
+}
+.bonus-save-row button {
+  background: #2e8b57;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 5px;
+  padding: calc(5px * var(--end-boost)) calc(9px * var(--end-boost));
+  font-family: inherit;
+  font-size: calc(13px * var(--end-boost));
+  cursor: pointer;
+}
+.bonus-save-row button:disabled { opacity: 0.6; cursor: default; }
+.bonus-save-status {
+  min-height: calc(15px * var(--end-boost));
+  font-size: calc(11px * var(--end-boost));
+  color: #555;
+}
+
+.bonus-leaderboard {
+  flex: 0 0 42%;
+  min-width: 0;
+  border-left: 2px dashed #c6c6c6;
+  padding-left: calc(12px * var(--end-boost));
+}
+.bonus-leaderboard h3 {
+  margin: 0 0 calc(6px * var(--end-boost));
+  color: #8b4513;
+  font-size: calc(15px * var(--end-boost));
+  text-align: center;
+  white-space: nowrap;
+}
+.lb-source {
+  display: inline-block;
+  padding: 1px 4px;
+  border: 1px solid #2e8b57;
+  border-radius: 3px;
+  color: #2e8b57;
+  font-size: calc(9px * var(--end-boost));
+  vertical-align: middle;
+}
+#bonus-leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: calc(12px * var(--end-boost));
+}
+#bonus-leaderboard-list li {
+  display: flex;
+  align-items: center;
+  gap: calc(5px * var(--end-boost));
+  padding: calc(2px * var(--end-boost)) calc(3px * var(--end-boost));
+  border-bottom: 1px dotted #ddd;
+  white-space: nowrap;
+}
+#bonus-leaderboard-list li.me { background: #fff4c1; font-weight: bold; }
+.lb-rank { width: calc(18px * var(--end-boost)); color: #8b4513; }
+.lb-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.lb-score { color: #b22222; font-weight: bold; }
+
 .bonus-result-actions {
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
   gap: calc(10px * var(--end-strong));
-  margin-top: calc(16px * var(--end-boost));
+  margin-top: calc(12px * var(--end-boost));
 }
 .bonus-result-actions button {
   background: #ffb6c1;
   border: 2px solid #fff;
   color: #222;
-  padding: calc(8px * var(--end-strong)) calc(16px * var(--end-strong));
+  padding: calc(7px * var(--end-strong)) calc(14px * var(--end-strong));
   font-family: inherit;
-  font-size: calc(16px * var(--end-strong));
+  font-size: calc(15px * var(--end-strong));
   border-radius: 6px;
   cursor: pointer;
 }

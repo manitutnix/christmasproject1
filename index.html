@@ -54,13 +54,27 @@
         </div>
       </div>
 
-      <!-- Bonus-Level: Ergebnis mit Highscore -->
+      <!-- Bonus-Level: Ergebnis mit Highscore und Bestliste -->
       <div id="bonus-result" class="bonus-result">
         <div class="bonus-result-box">
-          <h2 id="bonus-result-title">🎁 Bonus-Level beendet!</h2>
-          <p id="bonus-result-score">Punkte: 0</p>
-          <p id="bonus-result-high">Highscore: 0</p>
-          <p id="bonus-result-extra">Gefangen: 0 Kugeln · Verpasst: 0</p>
+          <div class="bonus-result-body">
+            <div class="bonus-result-main">
+              <h2 id="bonus-result-title">🎁 Bonus-Level beendet!</h2>
+              <p id="bonus-result-score">Punkte: 0</p>
+              <p id="bonus-result-high">Highscore: 0</p>
+              <p id="bonus-result-extra">Gefangen: 0 Kugeln · Verpasst: 0</p>
+              <div class="bonus-save-row">
+                <label for="bonus-player-name">Name:</label>
+                <input id="bonus-player-name" type="text" maxlength="12" value="Charlotte" autocomplete="off">
+                <button id="bonus-save-score-btn" type="button">Speichern</button>
+              </div>
+              <p id="bonus-save-status" class="bonus-save-status" aria-live="polite"></p>
+            </div>
+            <div class="bonus-leaderboard">
+              <h3>🏆 Bestliste <span id="bonus-lb-source" class="lb-source">Lokal</span></h3>
+              <ol id="bonus-leaderboard-list"><li>Lädt …</li></ol>
+            </div>
+          </div>
           <div class="bonus-result-actions">
             <button id="bonus-replay-btn">Nochmal spielen</button>
             <button id="bonus-back-btn">Zurück</button>
@@ -70,6 +84,8 @@
     </div>
   </div>
 
+  <script src="js/supabase-config.js"></script>
+  <script src="js/leaderboard.js"></script>
   <script src="js/game.js"></script>
 </body>
 </html>

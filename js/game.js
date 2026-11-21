@@ -190,6 +190,12 @@ const GAME = {
   bonusResult: null,
   bonusReplayBtn: null,
   bonusBackBtn: null,
+  bonusNameInput: null,
+  bonusSaveBtn: null,
+  bonusSaveStatus: null,
+  bonusLeaderboardList: null,
+  bonusLeaderboardSource: null,
+  bonusScoreSavedForRound: false,
 
   start() {
     this.dialog = document.getElementById('dialog-text');
@@ -203,7 +209,17 @@ const GAME = {
     this.bonusResult = document.getElementById('bonus-result');
     this.bonusReplayBtn = document.getElementById('bonus-replay-btn');
     this.bonusBackBtn = document.getElementById('bonus-back-btn');
+    this.bonusNameInput = document.getElementById('bonus-player-name');
+    this.bonusSaveBtn = document.getElementById('bonus-save-score-btn');
+    this.bonusSaveStatus = document.getElementById('bonus-save-status');
+    this.bonusLeaderboardList = document.getElementById('bonus-leaderboard-list');
+    this.bonusLeaderboardSource = document.getElementById('bonus-lb-source');
     this.bonusHighScore = this.loadBonusHighScore();
+    if (this.bonusNameInput) {
+      try {
+        this.bonusNameInput.value = localStorage.getItem('charlotte_bonus_name') || 'Charlotte';
+      } catch (e) { this.bonusNameInput.value = 'Charlotte'; }
+    }
 
     this.fitToViewport();
     window.addEventListener('resize', () => this.fitToViewport());
@@ -224,6 +240,7 @@ const GAME = {
       this.hideBonusResult();
       this.showEndScreen();
     });
+    this.bonusSaveBtn.addEventListener('click', () => this.saveBonusScore());
 
     const fsChange = () => this.onFullscreenChange();
     document.addEventListener('fullscreenchange', fsChange);
@@ -1894,6 +1911,7 @@ const GAME = {
     this.bonusScore = 0;
     this.bonusCaught = 0;
     this.bonusMissed = 0;
+    this.bonusScoreSavedForRound = false;
     this.bonusItems = [];
     this.bonusSpawnAcc = 0;
     this.bonusPlayerX = 400;
@@ -2042,6 +2060,15 @@ const GAME = {
     set('bonus-result-high', 'Highscore: ' + this.bonusHighScore);
     set('bonus-result-extra', 'Gefangen: ' + this.bonusCaught + ' Kugeln · Verpasst: ' + this.bonusMissed);
     if (this.bonusResult) this.bonusResult.style.display = 'flex';
+
+    // Bestliste laden und Speicher-UI für diese Runde zurücksetzen.
+    this.bonusScoreSavedForRound = false;
+    if (this.bonusSaveBtn) {
+      this.bonusSaveBtn.disabled = false;
+      this.bonusSaveBtn.textContent = 'Speichern';
+    }
+    if (this.bonusSaveStatus) this.bonusSaveStatus.textContent = '';
+    this.refreshBonusLeaderboard();
     this.say('Bonus-Level geschafft! Dein Highscore: ' + this.bonusHighScore + ' Punkte.');
   },
 
@@ -2057,6 +2084,68 @@ const GAME = {
 
   hideBonusResult() {
     if (this.bonusResult) this.bonusResult.style.display = 'none';
+  },
+
+  escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, (ch) => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[ch]);
+  },
+
+  saveBonusScore() {
+    if (this.bonusScoreSavedForRound || !window.BonusLeaderboard) return;
+    const name = window.BonusLeaderboard.sanitizeName(
+      this.bonusNameInput ? this.bonusNameInput.value : 'Charlotte'
+    );
+    if (this.bonusNameInput) this.bonusNameInput.value = name;
+    try { localStorage.setItem('charlotte_bonus_name', name); } catch (e) { /* ignore */ }
+
+    this.bonusScoreSavedForRound = true;
+    if (this.bonusSaveBtn) {
+      this.bonusSaveBtn.disabled = true;
+      this.bonusSaveBtn.textContent = 'OK';
+    }
+    if (this.bonusSaveStatus) this.bonusSaveStatus.textContent = 'Wird gespeichert …';
+
+    window.BonusLeaderboard.submit(name, this.bonusScore).then((result) => {
+      if (this.bonusSaveStatus) {
+        if (result.ok && result.source === 'supabase') {
+          this.bonusSaveStatus.textContent = 'Gespeichert! ✅';
+        } else if (result.ok) {
+          this.bonusSaveStatus.textContent = 'Lokal gespeichert (kein Supabase).';
+        } else {
+          this.bonusSaveStatus.textContent = 'Offline – lokal gespeichert.';
+        }
+      }
+      this.refreshBonusLeaderboard(name);
+    });
+  },
+
+  refreshBonusLeaderboard(highlightName) {
+    if (!this.bonusLeaderboardList || !window.BonusLeaderboard) return;
+    const requestId = (this.bonusLbRequestId || 0) + 1;
+    this.bonusLbRequestId = requestId;
+    this.bonusLeaderboardList.innerHTML = '<li>Lädt …</li>';
+
+    window.BonusLeaderboard.fetchTop().then((result) => {
+      if (requestId !== this.bonusLbRequestId || !this.bonusLeaderboardList) return;
+      if (this.bonusLeaderboardSource) {
+        this.bonusLeaderboardSource.textContent =
+          result.source === 'supabase' ? 'Online' : (result.ok ? 'Lokal' : 'Offline');
+      }
+      if (!result.rows || !result.rows.length) {
+        this.bonusLeaderboardList.innerHTML = '<li>Noch keine Einträge</li>';
+        return;
+      }
+      this.bonusLeaderboardList.innerHTML = result.rows.map((row, i) => {
+        const mine = highlightName && row.name === highlightName ? ' me' : '';
+        return '<li class="' + mine + '">' +
+          '<span class="lb-rank">' + (i + 1) + '.</span>' +
+          '<span class="lb-name">' + this.escapeHtml(row.name) + '</span>' +
+          '<span class="lb-score">' + row.score + '</span>' +
+          '</li>';
+      }).join('');
+    });
   },
 
   spawnEndDrifts() {

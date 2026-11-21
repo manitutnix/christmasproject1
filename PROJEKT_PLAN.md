@@ -195,7 +195,9 @@ Project1/
       fallen Weihnachtskugeln in vier Varianten (Rot 10, Grün 15, Blau 20,
       Violett 25 Punkte). Charlotte läuft per Zeiger/Touch oder `←`/`→`, `A`/`D`.
       Ergebnis-Overlay zeigt Punkte, gefangene/verpasste Kugeln und den Highscore,
-      der per `localStorage` dauerhaft gespeichert wird.
+      der per `localStorage` dauerhaft gespeichert wird. Zusätzlich gibt es eine
+      kleine Bestliste: Mit Supabase-Config läuft sie online über die REST API,
+      sonst lokal. Einrichtung und SQL-Policies stehen in `SUPABASE.md`.
 - [x] **Sound:** SFX-System (WebAudio) — Start, Whoosh, Hindernis, Sprung, Stolpern, Sieg, Münz-Piep im Bonus-Level.
 - [x] **Retro-Look:** Rausch-Overlay `retro-noise.svg` auf `#game`.
 - [x] **Endbildschirm v1.0:** „Frohe Weihnachten! 🎄" + Neu-Start-Button
