@@ -103,8 +103,11 @@ im Browser hard-reload (`Strg/Cmd + F5`).
   fehlen.
 - Badge **„Offline“**: Netzwerk/CORS problematisch oder Tabelle nicht da.
   Einträge werden dann lokal gespeichert und sind nicht verloren.
-- **`400 / neue Row verletzt eine CHECK-Bedingung`**: Name oder Punktzahl
-  passen nicht mehr zu den verschärften Regeln aus Schritt 6.
+- **`401 / 42501 new row violates row-level security policy`**: Name oder
+  Punktzahl passen nicht zu den verschärften Regeln aus Schritt 6. Das Spiel
+  zeigt dann „Offline – lokal gespeichert“, der Eintrag bleibt lokal erhalten.
+- **`400 / P0001 Dieser Name wurde zu oft gespeichert`**: Das Rate-Limit aus
+  Schritt 6 hat zugeschlagen (max. 3 Einträge pro Name und Minute).
 
 ## 6. Spam-Schutz (SQLOnly, empfohlen)
 
