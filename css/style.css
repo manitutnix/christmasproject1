@@ -84,18 +84,31 @@ body {
   margin: 0 calc(5px * var(--ui-boost));
 }
 
-/* Bonus-Level: kleines Banner, damit die Anzeige ganz oben sitzt und möglichst
-   viel Spielfläche für die fallenden Kugeln frei bleibt. */
+/* Bonus-Level: alles in einer schmalen Leiste direkt am oberen Rand. */
 #game.bonus-mode .title-banner {
-  top: calc(4px * var(--ui-boost));
-  left: calc(6px * var(--ui-boost));
+  top: 0;
+  left: 0;
+  border-width: 0 3px 3px 0;
+  border-radius: 0 0 8px 0;
   padding: calc(2px * var(--ui-boost)) calc(8px * var(--ui-boost));
-  border-width: 2px;
-  font-size: calc(11px * var(--ui-boost));
+  font-size: calc(10px * var(--ui-boost));
   letter-spacing: 0;
+  box-shadow: none;
 }
 #game.bonus-mode .title-banner::before,
 #game.bonus-mode .title-banner::after { display: none; }
+
+#game.bonus-mode .fs-btn {
+  top: 0;
+  right: 0;
+  width: calc(26px * var(--ui-boost-strong));
+  height: calc(26px * var(--ui-boost-strong));
+  border-radius: 0 0 0 6px;
+}
+#game.bonus-mode .reset-btn {
+  right: calc(26px * var(--ui-boost-strong));
+  border-radius: 0 0 6px 0;
+}
 
 /* Vollbild-Schalter und Reset oben rechts */
 .fs-btn {
@@ -921,15 +934,20 @@ body {
 .bonus-legend span { display: inline-flex; align-items: center; gap: 3px; }
 .bonus-legend img { width: 14px; height: auto; image-rendering: pixelated; }
 
-/* Anzeige und Legende direkt unter dem kompakten Banner */
+/* Punkte/Zeit/Rekord kleben am oberen Rand, direkt vor den Schaltern. */
 #game.bonus-mode .bonus-hud {
-  top: calc(36px * var(--ui-boost));
-  padding: calc(3px * var(--ui-boost)) calc(10px * var(--ui-boost));
-  gap: calc(12px * var(--ui-boost));
-  font-size: calc(13px * var(--ui-boost));
+  top: 0;
+  left: auto;
+  right: calc(58px * var(--ui-boost-strong));
+  transform: none;
+  border-width: 0 0 3px 3px;
+  border-radius: 0 0 0 8px;
+  padding: calc(2px * var(--ui-boost)) calc(8px * var(--ui-boost));
+  gap: calc(8px * var(--ui-boost));
+  font-size: calc(10px * var(--ui-boost));
 }
 #game.bonus-mode .bonus-legend {
-  top: calc(68px * var(--ui-boost));
+  top: calc(26px * var(--ui-boost));
   padding: calc(2px * var(--ui-boost)) calc(6px * var(--ui-boost));
   gap: calc(8px * var(--ui-boost));
   font-size: calc(10px * var(--ui-boost));

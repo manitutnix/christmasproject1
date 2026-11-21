@@ -123,10 +123,10 @@ const BONUS_ORNAMENTS = [
 ];
 // Unterschiedliche Kugelgrößen: kleine Kugeln sind häufiger, große leichter zu fangen.
 const BONUS_SIZES = [
-  { px: 18, weight: 4 },
-  { px: 24, weight: 4 },
-  { px: 30, weight: 3 },
-  { px: 38, weight: 1 }
+  { px: 14, weight: 4 },
+  { px: 22, weight: 4 },
+  { px: 34, weight: 2 },
+  { px: 50, weight: 1 }
 ];
 function pickBonusSize() {
   const total = BONUS_SIZES.reduce((sum, s) => sum + s.weight, 0);

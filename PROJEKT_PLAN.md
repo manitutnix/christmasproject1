@@ -198,10 +198,12 @@ Project1/
       gut sichtbarer Neustart-Button („▶  Neu starten").
 - [x] **Bonus-Level:** Vom Glückwunschbildschirm aus wählbar. 30 Sekunden lang
       fallen Weihnachtskugeln in vier Farben (Rot 10, Grün 15, Blau 20,
-      Violett 25 Punkte) und vier Größen (18/24/30/38 px – größere Kugeln sind
-      seltener und leichter zu fangen). Charlotte läuft per Zeiger/Touch oder
-      `←`/`→`, `A`/`D`. Das Titelbanner wird im Bonus-Level verkleinert und
-      Punkte/Zeit/Rekord sitzen direkt darunter, damit viel Spielfläche frei bleibt.
+      Violett 25 Punkte) und vier deutlich verschiedenen Größen
+      (14/22/34/50 px – größere Kugeln sind seltener und leichter zu fangen).
+      Charlotte läuft per Zeiger/Touch oder `←`/`→`, `A`/`D`. Im Bonus-Level
+      werden Titelbanner und Schalter zu einer schmalen Leiste am oberen Rand
+      verkleinert; Punkte/Zeit/Rekord kleben direkt daneben ebenfalls bei top:0,
+      die Legende folgt darunter. Dadurch bleibt möglichst viel Spielfläche frei.
       Ergebnis-Overlay zeigt Punkte, gefangene/verpasste Kugeln und den Highscore,
       der per `localStorage` dauerhaft gespeichert wird. Zusätzlich gibt es eine
       kleine Bestliste: Mit Supabase-Config läuft sie online über die REST API,
