@@ -20,6 +20,9 @@ create table if not exists public.bonus_highscores (
 create index if not exists bonus_highscores_score_idx
   on public.bonus_highscores (score desc);
 
+-- Der Browser-Key läuft unter der Postgres-Rolle anon – Rechte explizit geben.
+grant select, insert on public.bonus_highscores to anon;
+
 alter table public.bonus_highscores enable row level security;
 
 -- Bei erneutem Ausführen zuerst vorhandene Policies entfernen:
@@ -93,7 +96,10 @@ im Browser hard-reload (`Strg/Cmd + F5`).
   ist in diesem Fall bereits korrekt – nur die Tabelle fehlt.
 - **`401 Unauthorized`**: Falscher Key. Der Browser braucht den publishable
   key (`sb_publishable_…`), nicht den secret key (`sb_secret_…`).
-- **`403 / permission denied`**: RLS ist aktiv, aber die Policies aus Schritt 1
-  fehlen, oder dem `anon`-Role fehlt das `SELECT`/`INSERT`-Grant.
+- **`401 / 42501 permission denied for table`**: Dem `anon`-Role fehlt das
+  `SELECT`/`INSERT`-Grant. Die `grant … to anon;`-Zeile aus Schritt 1 erneut
+  ausführen.
+- **`403 / row-level security`**: RLS ist aktiv, aber die Policies aus Schritt 1
+  fehlen.
 - Badge **„Offline“**: Netzwerk/CORS problematisch oder Tabelle nicht da.
   Einträge werden dann lokal gespeichert und sind nicht verloren.
