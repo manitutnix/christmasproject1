@@ -12,7 +12,7 @@
    ============================================================ */
 window.SUPABASE_CONFIG = {
   enabled: false,
-  url: 'https://DEIN_PROJEKT.supabase.co',
+  url: 'https://mcnmplqipvpdhvhlffek.supabase.co',
   anonKey: 'DEIN_ANON_KEY',
   table: 'bonus_highscores',
   limit: 5
