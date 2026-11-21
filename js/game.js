@@ -121,6 +121,23 @@ const BONUS_ORNAMENTS = [
   { src: ASSETS.ornamentBlue,  points: 20, name: 'Blau' },
   { src: ASSETS.ornamentPurple,points: 25, name: 'Violett' }
 ];
+// Unterschiedliche Kugelgrößen: kleine Kugeln sind häufiger, große leichter zu fangen.
+const BONUS_SIZES = [
+  { px: 18, weight: 4 },
+  { px: 24, weight: 4 },
+  { px: 30, weight: 3 },
+  { px: 38, weight: 1 }
+];
+function pickBonusSize() {
+  const total = BONUS_SIZES.reduce((sum, s) => sum + s.weight, 0);
+  let roll = Math.random() * total;
+  for (const size of BONUS_SIZES) {
+    roll -= size.weight;
+    if (roll < 0) return size.px;
+  }
+  return BONUS_SIZES[BONUS_SIZES.length - 1].px;
+}
+
 const BONUS_HIGHSCORE_KEY = 'charlotte_bonus_highscore';
 
 const GAME = {
@@ -156,7 +173,7 @@ const GAME = {
   bonusHighScore: 0,
   bonusCaught: 0,
   bonusMissed: 0,
-  bonusDuration: 20000,
+  bonusDuration: 30000,
   bonusStartAt: 0,
   bonusLastTs: 0,
   bonusLoop: null,
@@ -306,6 +323,9 @@ const GAME = {
 
   renderScene() {
     const scene = document.getElementById('scene');
+    const game = document.getElementById('game');
+    // Im Bonus-Level wird das Banner kompakt und die Anzeige nach oben gerückt.
+    if (game) game.classList.toggle('bonus-mode', this.scene === 'bonus');
     this.stopBird();          // laufende Vogel-Timer/-Animationen beenden
     scene.innerHTML = '';
     scene.style.background = '';
@@ -1833,6 +1853,8 @@ const GAME = {
   },
 
   showEndScreen() {
+    const game = document.getElementById('game');
+    if (game) game.classList.remove('bonus-mode');
     const title = document.getElementById('end-title');
     const msg = document.getElementById('end-message');
     const dist = document.getElementById('end-stat-dist');
@@ -1990,11 +2012,14 @@ const GAME = {
       item.wobble += item.wobbleSpeed * dt;
       item.x += Math.sin(item.wobble) * 10 * dt;
       item.angle += item.spin * dt;
-      item.el.style.left = (item.x - 13) + 'px';
-      item.el.style.top = (item.y - 16) + 'px';
+      item.el.style.left = (item.x - item.halfW) + 'px';
+      item.el.style.top = (item.y - item.halfH) + 'px';
       item.el.style.transform = 'rotate(' + item.angle.toFixed(1) + 'deg)';
 
-      if (Math.abs(item.x - this.bonusPlayerX) < 50 && item.y >= 255 && item.y <= 305) {
+      // Größere Kugeln haben einen größeren Fangbereich, sonst bleibt die
+      // Fangzone unabhängig von der Sprite-Größe gleich.
+      const catchRadius = 38 + item.halfW;
+      if (Math.abs(item.x - this.bonusPlayerX) < catchRadius && item.y >= 255 && item.y <= 305) {
         this.collectBonusOrnament(i);
       } else if (item.y > 330) {
         item.el.remove();
@@ -2015,15 +2040,19 @@ const GAME = {
     el.src = variant.src;
     el.alt = '';
     el.className = 'pixel-sprite bonus-ornament';
-    el.style.width = '26px';
+    const size = pickBonusSize();
+    const halfW = size / 2;
+    const halfH = Math.round(size * 0.6);
+    el.style.width = size + 'px';
+    el.style.height = (halfH * 2) + 'px';
     const x = 40 + Math.random() * 720;
-    const y = -30;
-    el.style.left = (x - 13) + 'px';
-    el.style.top = (y - 16) + 'px';
+    const y = -30 - halfH;
+    el.style.left = (x - halfW) + 'px';
+    el.style.top = (y - halfH) + 'px';
     el.style.zIndex = '14';
     scene.appendChild(el);
     this.bonusItems.push({
-      el: el, x: x, y: y,
+      el: el, x: x, y: y, size: size, halfW: halfW, halfH: halfH,
       vy: 150 + progress * 140 + Math.random() * 70,
       angle: Math.random() * 360,
       spin: (Math.random() - 0.5) * 220,

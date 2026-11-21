@@ -196,9 +196,12 @@ Project1/
 - [x] **Endbildschirm:** Titel „RASERIG AUF DIE ZIELE — WEIHNACHTEN!" (Gewinn),
       Statistik (Geschwindigkeit), Funken über dem Titel, Schneewehen und ein
       gut sichtbarer Neustart-Button („▶  Neu starten").
-- [x] **Bonus-Level:** Vom Glückwunschbildschirm aus wählbar. 20 Sekunden lang
-      fallen Weihnachtskugeln in vier Varianten (Rot 10, Grün 15, Blau 20,
-      Violett 25 Punkte). Charlotte läuft per Zeiger/Touch oder `←`/`→`, `A`/`D`.
+- [x] **Bonus-Level:** Vom Glückwunschbildschirm aus wählbar. 30 Sekunden lang
+      fallen Weihnachtskugeln in vier Farben (Rot 10, Grün 15, Blau 20,
+      Violett 25 Punkte) und vier Größen (18/24/30/38 px – größere Kugeln sind
+      seltener und leichter zu fangen). Charlotte läuft per Zeiger/Touch oder
+      `←`/`→`, `A`/`D`. Das Titelbanner wird im Bonus-Level verkleinert und
+      Punkte/Zeit/Rekord sitzen direkt darunter, damit viel Spielfläche frei bleibt.
       Ergebnis-Overlay zeigt Punkte, gefangene/verpasste Kugeln und den Highscore,
       der per `localStorage` dauerhaft gespeichert wird. Zusätzlich gibt es eine
       kleine Bestliste: Mit Supabase-Config läuft sie online über die REST API,
